@@ -73,15 +73,15 @@ CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o: CMakeFiles/LaserDemo.dir/flags.ma
 CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o: /home/rsi/Documents/Laser/src/laser_main.cpp
 CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o: CMakeFiles/LaserDemo.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/rsi/Documents/Laser/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o -MF CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o.d -o CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o -c /home/rsi/Documents/Laser/src/laser_main.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o -MF CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o.d -o CMakeFiles/LaserDemo.dir/src/laser_main.cpp.o -c /home/rsi/Documents/Laser/src/laser_main.cpp
 
 CMakeFiles/LaserDemo.dir/src/laser_main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/LaserDemo.dir/src/laser_main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/rsi/Documents/Laser/src/laser_main.cpp > CMakeFiles/LaserDemo.dir/src/laser_main.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/rsi/Documents/Laser/src/laser_main.cpp > CMakeFiles/LaserDemo.dir/src/laser_main.cpp.i
 
 CMakeFiles/LaserDemo.dir/src/laser_main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/LaserDemo.dir/src/laser_main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/rsi/Documents/Laser/src/laser_main.cpp -o CMakeFiles/LaserDemo.dir/src/laser_main.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/rsi/Documents/Laser/src/laser_main.cpp -o CMakeFiles/LaserDemo.dir/src/laser_main.cpp.s
 
 # Object files for target LaserDemo
 LaserDemo_OBJECTS = \

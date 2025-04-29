@@ -231,6 +231,13 @@ int main()
             cout << "Using device: " << camera.GetDeviceInfo().GetModelName() << endl;
             camera.Open();
 
+            CEnumerationPtr exposureAuto(camera.GetNodeMap().GetNode("ExposureAuto"));
+            if (IsAvailable(exposureAuto) && IsWritable(exposureAuto))
+            {
+                exposureAuto->FromString("Continuous");
+                cout << "ExposureAuto set to Continuous" << endl;
+            }
+
             // --- Camera Configuration (Force BayerBG8, No Mono8 Fallback) ---
             INodeMap &nodemap = camera.GetNodeMap();
             cout << "Configuring camera..." << endl;

@@ -118,7 +118,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-std=gnu++20"
+					"fragment" : "-g -std=gnu++20"
 				},
 				{
 					"backtrace" : 10,
@@ -168,6 +168,10 @@
 	{
 		"commandFragments" : 
 		[
+			{
+				"fragment" : "-g",
+				"role" : "flags"
+			},
 			{
 				"fragment" : "",
 				"role" : "flags"
