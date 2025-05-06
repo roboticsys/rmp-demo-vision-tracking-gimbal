@@ -22,13 +22,13 @@ using namespace cv;
 
 // --- Constants ---
 // Motor Control Constants from "older code"
-const double MAX_VELOCITY = 0.04;
+const double MAX_VELOCITY = 0.2;
 const double ACCELERATION = 2.0;
 const double DECELERATION = 2.0;
 const double CENTER_X = 320; // HARDCODED Center X for motor offset calculation
 const double CENTER_Y = 240; // HARDCODED Center Y for motor offset calculation
 const double PROPORTIONAL_GAIN = 1.0;
-const double VELOCITY_SCALING = 0.01;
+const double VELOCITY_SCALING = 0.002;
 const double MIN_POSITION = -0.05;
 const double MAX_POSITION = 0.05;
 const double DEAD_ZONE = 40.0; // Dead zone in PIXELS for motor offset
@@ -37,12 +37,12 @@ const double MIN_CONTOUR_AREA = 10.0;
 const double MIN_CIRCLE_RADIUS = 1.0;
 
 // HSV Thresholds (initial guesses)
-int lowH = 100;  // Lower Hue
-int highH = 130; // Upper Hue
-int lowS = 70;   // Lower Saturation
+int lowH = 105;  // Lower Hue
+int highH = 126; // Upper Hue
+int lowS = 0;   // Lower Saturation
 int highS = 255; // Upper Saturation
-int lowV = 50;   // Lower Value
-int highV = 255; // Upper Value
+int lowV = 35;   // Lower Value
+int highV = 190; // Upper Value
 
 // --- Global Variables ---
 MotionController *controller = nullptr;
@@ -50,9 +50,14 @@ Axis *axisX = nullptr;
 Axis *axisY = nullptr;
 bool motorsPaused = false;
 
-// --- MoveMotorsWithLimits Function (Copied from your "older code") ---
 void MoveMotorsWithLimits(Axis *axisX, Axis *axisY, double offsetX, double offsetY)
-{ /* ... Function body exactly as before ... */
+{
+    static const double POSITION_DEAD_ZONE = 0.0005;
+    static const double PIXEL_DEAD_ZONE = DEAD_ZONE;
+    static const double MAX_OFFSET = 320.0; // max pixel offset
+    static const double MIN_VELOCITY = 0.0001;
+    static const double jerkPct = 30.0; // Smoother than 50%
+
     if (motorsPaused)
     {
         try
@@ -68,63 +73,38 @@ void MoveMotorsWithLimits(Axis *axisX, Axis *axisY, double offsetX, double offse
         }
         return;
     }
+
+    // --- Dead zone logic ---
+    if (std::abs(offsetX) < PIXEL_DEAD_ZONE && std::abs(offsetY) < PIXEL_DEAD_ZONE)
+    {
+        axisX->MoveVelocity(0);
+        axisY->MoveVelocity(0);
+        return;
+    }
+
     try
     {
-        if (abs(offsetX) < DEAD_ZONE && abs(offsetY) < DEAD_ZONE)
-        {
-            axisX->MoveVelocity(0);
-            axisY->MoveVelocity(0);
-            return;
-        }
+        // --- Normalize pixel offsets to [-1, 1] ---
+        double normX = std::clamp(offsetX / MAX_OFFSET, -1.0, 1.0);
+        double normY = std::clamp(offsetY / MAX_OFFSET, -1.0, 1.0);
 
-        double currentX = axisX->ActualPositionGet();
-        double currentY = axisY->ActualPositionGet();
-        double velocityX = PROPORTIONAL_GAIN * offsetX * VELOCITY_SCALING;
-        double velocityY = PROPORTIONAL_GAIN * offsetY * VELOCITY_SCALING;
-        velocityX = std::clamp(velocityX, -MAX_VELOCITY, MAX_VELOCITY);
-        velocityY = std::clamp(velocityY, -MAX_VELOCITY, MAX_VELOCITY);
+        // --- Exponential scaling to reduce velocity when near center ---
+        double velX = -std::copysign(1.0, normX) * std::pow(std::abs(normX), 1.5) * MAX_VELOCITY;
+        double velY = -std::copysign(1.0, normY) * std::pow(std::abs(normY), 1.5) * MAX_VELOCITY;
 
-        if ((currentX <= MIN_POSITION && velocityX < 0) || (currentX >= MAX_POSITION && velocityX > 0))
-        {
-            velocityX = 0;
-            axisX->MoveVelocity(0);
-        }
-        if ((currentY <= MIN_POSITION && velocityY < 0) || (currentY >= MAX_POSITION && velocityY > 0))
-        {
-            velocityY = 0;
-            axisY->MoveVelocity(0);
-        }
-        static double prevVelocityX = 0;
-        static double prevVelocityY = 0;
-        double ramp_factor = 0.01;
-        if (velocityX > prevVelocityX)
-        {
-            velocityX = std::min(MAX_VELOCITY, prevVelocityX + ACCELERATION * ramp_factor);
-        }
-        else if (velocityX < prevVelocityX)
-        {
-            velocityX = std::max(-MAX_VELOCITY, prevVelocityX - DECELERATION * ramp_factor);
-        }
-        if (velocityY > prevVelocityY)
-        {
-            velocityY = std::min(MAX_VELOCITY, prevVelocityY + ACCELERATION * ramp_factor);
-        }
-        else if (velocityY < prevVelocityY)
-        {
-            velocityY = std::max(-MAX_VELOCITY, prevVelocityY - DECELERATION * ramp_factor);
-        }
-        if (std::abs(velocityX) < 1e-6)
-            velocityX = 0.0;
-        if (std::abs(velocityY) < 1e-6)
-            velocityY = 0.0;
-        axisX->MoveVelocity(-velocityX);
-        axisY->MoveVelocity(-velocityY); // Apply NEGATED velocity
-        prevVelocityX = velocityX;
-        prevVelocityY = velocityY;
+        // --- Avoid tiny jitter motions ---
+        if (std::abs(velX) < MIN_VELOCITY)
+            velX = 0.0;
+        if (std::abs(velY) < MIN_VELOCITY)
+            velY = 0.0;
+
+        // --- Velocity mode only (no MoveSCurve to position) ---
+        axisX->MoveVelocity(velX);
+        axisY->MoveVelocity(velY);
     }
     catch (const std::exception &ex)
     {
-        cerr << "Error during motor movement: " << ex.what() << endl;
+        cerr << "Error during velocity control: " << ex.what() << endl;
         try
         {
             if (axisX)
@@ -251,7 +231,7 @@ int main()
             CFloatPtr exposureTime(nodemap.GetNode("ExposureTime"));
             if (IsAvailable(exposureTime) && IsWritable(exposureTime))
             {
-                exposureTime->SetValue(50000.0); // µs
+                exposureTime->SetValue(5000.0); // µs
             }
 
             cout << "Configuring camera..." << endl;
@@ -285,7 +265,6 @@ int main()
             createTrackbar("LowV", "Trackbars", &lowV, 255); // Value range: 0-255
             createTrackbar("HighV", "Trackbars", &highV, 255);
 
-
             if (IsAvailable(pixelFormat))
             {
                 try
@@ -307,9 +286,9 @@ int main()
             }
 
             camera.MaxNumBuffer = 3;
-            GenApi::CIntegerPtr(camera.GetNodeMap().GetNode("GevSCPD"))->SetValue(20000);
-            camera.StartGrabbing(GrabStrategy_LatestImageOnly);
-            std::this_thread::sleep_for(std::chrono::milliseconds(200)); // Let it warm up
+            GenApi::CIntegerPtr(camera.GetNodeMap().GetNode("GevSCPD"))->SetValue(30000);
+            camera.StartGrabbing(GrabStrategy_OneByOne);
+            std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Let it warm up
             cout << "Checking camera grabbing status after StartGrabbing..." << endl;
             if (!camera.IsGrabbing())
             {
@@ -350,7 +329,7 @@ int main()
                 }
 
                 auto now = std::chrono::steady_clock::now();
-                if (std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count() > 5)
+                if (std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count() > 10)
                 {
                     cerr << "Timeout waiting for first frame. Exiting startup." << endl;
                     gShutdown = 1;
@@ -442,7 +421,7 @@ int main()
                     inRange(hsvFrame, lower_ball, upper_ball, mask);
 
                     // Morphological operations
-                    Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(7, 7));
+                    Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(5, 5));
                     erode(mask, mask, kernel);
                     dilate(mask, mask, kernel);
                     // Optional extra smoothing step to close internal gaps
@@ -514,7 +493,6 @@ int main()
                         target_found_last_frame = false;
                     }
 
-                    // --- Show the processed images ---
                     imshow("Processed Frame", rgbFrame);
                     imshow("Red Mask", mask);
 
@@ -523,8 +501,11 @@ int main()
                     total_loop_time_ms += cycle_time_ms;
                     frame_count++;
 
-                    std::cout << "[PERF] Frame time: " << cycle_time_ms << " ms"
-                              << " | Avg time: " << (total_loop_time_ms / frame_count) << " ms" << std::endl;
+                    static double smoothedFrameTime = 0.0;
+                    smoothedFrameTime = 0.9 * smoothedFrameTime + 0.1 * cycle_time_ms;
+                    std::cout << "[PERF] Smoothed Frame Time: " << smoothedFrameTime << " ms" << std::endl;
+
+                    std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Limits loop to ~200 FPS max
 
                     // --- WaitKey immediately after imshow ---
                     int key = waitKey(1);
