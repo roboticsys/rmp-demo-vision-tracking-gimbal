@@ -1,9 +1,9 @@
 {
   "Settings": {
-    "ipAddress": "127.0.0.1",
-    "port": 50051,
-    "sshUsername": "",
-    "sshPassword": "",
+    "ipAddress": "localhost",
+    "port": 50061,
+    "sshUsername": "rsi",
+    "sshPassword": "admin",
     "autoReconnect": true,
     "pollingIntervalMs": 100
   }
