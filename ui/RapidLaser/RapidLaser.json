@@ -1,0 +1,10 @@
+{
+  "Settings": {
+    "ipAddress": "127.0.0.1",
+    "port": 50051,
+    "sshUsername": "",
+    "sshPassword": "",
+    "autoReconnect": true,
+    "pollingIntervalMs": 100
+  }
+}
