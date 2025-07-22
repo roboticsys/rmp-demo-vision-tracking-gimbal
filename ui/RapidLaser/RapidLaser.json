@@ -1,10 +1,15 @@
 {
   "Settings": {
-    "ipAddress": "localhost",
-    "port": 50061,
-    "sshUsername": "rsi",
-    "sshPassword": "admin",
-    "autoReconnect": true,
-    "pollingIntervalMs": 100
+    "server_IpAddress": "localhost",
+    "server_Port": 50061,
+    "server_AutoReconnect": true,
+
+    "ssh_Username": "rsi",
+    "ssh_Password": "admin",
+
+    "polling_IntervalMs": 100,
+
+    "global_X": "targetX",
+    "global_Y": "targetY"
   }
 }
