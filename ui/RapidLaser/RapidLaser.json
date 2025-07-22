@@ -7,7 +7,7 @@
     "ssh_Username": "rsi",
     "ssh_Password": "admin",
 
-    "polling_IntervalMs": 100,
+    "polling_IntervalMs": 160,
 
     "global_X": "targetX",
     "global_Y": "targetY"
