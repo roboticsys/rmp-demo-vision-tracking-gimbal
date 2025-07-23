@@ -6,6 +6,7 @@
 
     "ssh_Username": "rsi",
     "ssh_Password": "admin",
+    "ssh_RunCommand": "your_command_here",
 
     "polling_IntervalMs": 160,
 
