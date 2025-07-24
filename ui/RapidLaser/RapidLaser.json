@@ -10,7 +10,8 @@
 
     "polling_IntervalMs": 160,
 
-    "global_X": "targetX",
-    "global_Y": "targetY"
+    "global_BallX": "targetX",
+    "global_BallY": "targetY",
+    "global_BallRadius": "radius"
   }
 }
