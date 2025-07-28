@@ -12,6 +12,7 @@
 
     "global_BallX": "",
     "global_BallY": "",
-    "global_BallRadius": ""
+    "global_BallRadius": "",
+    "global_IsMotionEnabled": ""
   }
 }
