@@ -6,7 +6,7 @@
 
     "ssh_Username": "rsi",
     "ssh_Password": "admin",
-    "ssh_RunCommand": "rsiconfig /rmp_config/rmp.xml --cpu-affinity 3 --primary-nic enp1s0",
+    "ssh_RunCommand": "rsiconfig /rmp_config/rmp.xml --cpu-affinity 7 --primary-nic enp1s0",
 
     "polling_IntervalMs": 160,
 
