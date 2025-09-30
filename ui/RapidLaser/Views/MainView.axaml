@@ -1,0 +1,2290 @@
+<UserControl
+    x:Class="RapidLaser.Views.MainView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:actipro="http://schemas.actiprosoftware.com/avaloniaui"
+    xmlns:behaviors="using:RapidLaser.Behaviors"
+    xmlns:controls="using:RapidLaser.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:icons="using:Material.Icons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:resources="using:RapidLaser.Resources"
+    xmlns:vm="using:RapidLaser.ViewModels"
+    d:DesignHeight="1000"
+    d:DesignWidth="1500"
+    x:DataType="vm:MainViewModel"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <ContentControl Classes.is-connected="{Binding IsConnected, Mode=TwoWay}" Classes.is-connected-n="{Binding !IsConnected, Mode=TwoWay}">
+
+        <Grid Margin="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="280" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--  Top bar card with drag region  -->
+            <Border
+                Grid.Row="0"
+                Grid.ColumnSpan="3"
+                Margin="0,0,0,12"
+                Padding="5,7"
+                Classes="card"
+                PointerPressed="OnTitleBarPointerPressed">
+
+                <Grid Margin="6,0,0,0">
+
+                    <!--  Left side content  -->
+                    <StackPanel
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="16">
+                        <icons:MaterialIcon
+                            Width="25"
+                            Height="25"
+                            Margin="0,0,-10,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource TextBrush}"
+                            Kind="MotionOutline" />
+                        <TextBlock
+                            Margin="0,-1,0,0"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextBrush}"
+                            Text="Real-Time Ball Tracker" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="14"
+                            Foreground="{StaticResource SubtleTextBrush}"
+                            Text="RMP RTTasks + Camera + OpenCV" />
+                    </StackPanel>
+
+                    <!--  Right side content with status and custom window controls  -->
+                    <StackPanel
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="12">
+
+                        <!--  FPS Counter  -->
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Foreground="{StaticResource SubtleTextBrush}"
+                            IsVisible="False"
+                            Text="30 FPS" />
+
+                        <!--  Custom Window Controls  -->
+                        <StackPanel
+                            Margin="16,0,0,0"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="0">
+
+                            <!--  Minimize Button  -->
+                            <Button
+                                Name="MinimizeButton"
+                                Width="32"
+                                Height="32"
+                                Padding="6"
+                                VerticalAlignment="Center"
+                                Classes="theme-subtle shadowless"
+                                Command="{Binding MinimizeWindowCommand}"
+                                Foreground="{StaticResource SubtleTextBrush}">
+                                <Button.Content>
+                                    <Path
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Data="M 0,0 L 8,0"
+                                        Stroke="{Binding $parent[Button].Foreground}"
+                                        StrokeThickness="1" />
+                                </Button.Content>
+                            </Button>
+
+                            <!--  Maximize/Restore Button  -->
+                            <Button
+                                Name="MaximizeButton"
+                                Width="32"
+                                Height="32"
+                                Padding="6"
+                                VerticalAlignment="Center"
+                                Classes="theme-subtle shadowless"
+                                Command="{Binding MaximizeWindowCommand}"
+                                Foreground="{StaticResource SubtleTextBrush}">
+                                <Button.Content>
+                                    <Path
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Data="M 0,0 L 8,0 L 8,8 L 0,8 Z"
+                                        Fill="Transparent"
+                                        Stroke="{Binding $parent[Button].Foreground}"
+                                        StrokeThickness="1" />
+                                </Button.Content>
+                            </Button>
+
+                            <!--  Close Button  -->
+                            <Button
+                                Name="CloseButton"
+                                Width="32"
+                                Height="32"
+                                Padding="6"
+                                VerticalAlignment="Center"
+                                Classes="theme-subtle shadowless"
+                                Command="{Binding CloseWindowCommand}"
+                                Foreground="{StaticResource SubtleTextBrush}">
+                                <Button.Content>
+                                    <Path
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Data="M 0,0 L 8,8 M 8,0 L 0,8"
+                                        Stroke="{Binding $parent[Button].Foreground}"
+                                        StrokeThickness="1" />
+                                </Button.Content>
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Foreground" Value="#E81123" />
+                                    </Style>
+                                </Button.Styles>
+                            </Button>
+
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Left sidebar - stacked cards  -->
+            <StackPanel
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="0,0,12,0"
+                VerticalAlignment="Top"
+                Spacing="12">
+
+                <!--  gRPC Connection Card  -->
+                <Border
+                    Name="grpcCard"
+                    Classes="card"
+                    ClipToBounds="True">
+
+                    <Grid>
+                        <!--  Subtle gradient overlay  -->
+                        <actipro:MeshGradientPresenter Margin="-12" IsVisible="{Binding IsConnected}">
+                            <actipro:MeshGradientPresenter.Styles>
+                                <Style Selector="actipro|MeshGradientPresenter">
+                                    <Style.Animations>
+                                        <Animation IterationCount="INFINITE" Duration="0:0:3">
+                                            <KeyFrame Cue="0%">
+                                                <Setter Property="Opacity" Value="1.0" />
+                                            </KeyFrame>
+                                            <KeyFrame Cue="50%">
+                                                <Setter Property="Opacity" Value="0.3" />
+                                            </KeyFrame>
+                                            <KeyFrame Cue="100%">
+                                                <Setter Property="Opacity" Value="1.0" />
+                                            </KeyFrame>
+                                        </Animation>
+                                    </Style.Animations>
+                                </Style>
+                            </actipro:MeshGradientPresenter.Styles>
+                            <actipro:MeshGradientNode Center="100%, 0%" Color="#304CAF50" />
+                            <actipro:MeshGradientNode Center="0%, 100%" Color="#00000000" />
+                        </actipro:MeshGradientPresenter>
+
+                        <actipro:MeshGradientPresenter Margin="-12" IsVisible="{Binding !IsConnected}">
+                            <actipro:MeshGradientPresenter.Styles>
+                                <Style Selector="actipro|MeshGradientPresenter">
+                                    <Style.Animations>
+                                        <Animation IterationCount="INFINITE" Duration="0:0:3">
+                                            <KeyFrame Cue="0%">
+                                                <Setter Property="Opacity" Value="1.0" />
+                                            </KeyFrame>
+                                            <KeyFrame Cue="50%">
+                                                <Setter Property="Opacity" Value="0.3" />
+                                            </KeyFrame>
+                                            <KeyFrame Cue="100%">
+                                                <Setter Property="Opacity" Value="1.0" />
+                                            </KeyFrame>
+                                        </Animation>
+                                    </Style.Animations>
+                                </Style>
+                            </actipro:MeshGradientPresenter.Styles>
+                            <actipro:MeshGradientNode Center="100%, 0%" Color="#30F44336" />
+                            <actipro:MeshGradientNode Center="0%, 100%" Color="#00000000" />
+                        </actipro:MeshGradientPresenter>
+
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!--  title  -->
+                                <StackPanel
+                                    Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    Spacing="3">
+                                    <TextBlock
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Foreground="{StaticResource TextBrush}"
+                                        Text="RapidServer" />
+                                    <TextBlock
+                                        Margin="0,0,0,1"
+                                        VerticalAlignment="Bottom"
+                                        FontSize="11"
+                                        FontWeight="Light"
+                                        Opacity="0.4"
+                                        Text="over gRPC" />
+                                </StackPanel>
+
+                                <!--  icon status  -->
+                                <icons:MaterialIcon
+                                    Grid.Column="1"
+                                    Width="19"
+                                    Height="19"
+                                    VerticalAlignment="Center">
+                                    <icons:MaterialIcon.Styles>
+                                        <Style Selector="ContentControl.is-connected icons|MaterialIcon">
+                                            <Setter Property="Kind" Value="LanCheck" />
+                                            <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidSuccess}" />
+                                        </Style>
+                                        <Style Selector="ContentControl:not(.is-connected) icons|MaterialIcon">
+                                            <Setter Property="Kind" Value="LanDisconnect" />
+                                            <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}" />
+                                        </Style>
+                                    </icons:MaterialIcon.Styles>
+                                </icons:MaterialIcon>
+
+                                <!--  Disconnect Button  -->
+                                <Button
+                                    Grid.Column="1"
+                                    Margin="-4"
+                                    HorizontalAlignment="Right"
+                                    Classes="theme-soft danger"
+                                    Command="{Binding DisconnectCommand}"
+                                    Content="Disconnect"
+                                    FontSize="12">
+                                    <Button.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="#grpcCard.IsPointerOver" />
+                                            <Binding Path="IsConnected" />
+                                        </MultiBinding>
+                                    </Button.IsVisible>
+                                </Button>
+                            </Grid>
+
+                            <!--  server config - connected  -->
+                            <StackPanel
+                                Margin="0,12,0,0"
+                                IsVisible="{Binding !IsConnected}"
+                                Spacing="8">
+
+                                <!--  IP Address  -->
+                                <controls:LabeledControl
+                                    IsEnabled="{Binding !IsConnected}"
+                                    Label="IP Address"
+                                    LabelWidth="60">
+                                    <TextBox
+                                        HorizontalAlignment="Stretch"
+                                        Text="{Binding IpAddress}"
+                                        ToolTip.Tip="IP Address">
+                                        <TextBox.KeyBindings>
+                                            <KeyBinding Command="{Binding ConnectCommand}" Gesture="Enter" />
+                                        </TextBox.KeyBindings>
+                                    </TextBox>
+                                </controls:LabeledControl>
+
+                                <!--  Port  -->
+                                <controls:LabeledControl
+                                    IsEnabled="{Binding !IsConnected}"
+                                    Label="Port"
+                                    LabelWidth="60">
+                                    <TextBox
+                                        HorizontalAlignment="Stretch"
+                                        Text="{Binding Port}"
+                                        ToolTip.Tip="Port">
+                                        <TextBox.KeyBindings>
+                                            <KeyBinding Command="{Binding ConnectCommand}" Gesture="Enter" />
+                                        </TextBox.KeyBindings>
+                                    </TextBox>
+                                </controls:LabeledControl>
+
+                                <!--  Connection Buttons  -->
+                                <Button
+                                    Margin="0,2,0,0"
+                                    HorizontalAlignment="Right"
+                                    Classes="theme-soft success"
+                                    Command="{Binding ConnectCommand}"
+                                    Content="Connect"
+                                    IsEnabled="{Binding !IsConnecting}"
+                                    IsVisible="{Binding !IsConnected}" />
+
+                            </StackPanel>
+
+                            <!--  Error Display  -->
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                Foreground="#F44336"
+                                IsVisible="{Binding LastError, Converter={x:Static resources:Converters.StringNotEmptyToBoolConverter}}"
+                                Text="{Binding LastError}"
+                                TextWrapping="Wrap" />
+
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!--  SSH Card  -->
+                <Border
+                    Name="SshCard"
+                    Classes="card"
+                    IsEnabled="{Binding IsConnected}">
+
+                    <StackPanel Spacing="8">
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <TextBlock
+                                    Grid.Column="0"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    Foreground="{StaticResource TextBrush}"
+                                    Text="SSH" />
+                                <TextBlock
+                                    Margin="0,0,0,1"
+                                    VerticalAlignment="Bottom"
+                                    FontSize="11"
+                                    FontWeight="Light"
+                                    Opacity="0.4"
+                                    Text="for sending commands" />
+                            </StackPanel>
+
+                            <icons:MaterialIcon
+                                Grid.Column="1"
+                                Width="17"
+                                Height="17"
+                                VerticalAlignment="Center"
+                                Classes.is-ssh-authenticated="{Binding IsSshAuthenticated}"
+                                Classes.is-ssh-not-authenticated="{Binding !IsSshAuthenticated}">
+                                <icons:MaterialIcon.Styles>
+                                    <Style Selector="icons|MaterialIcon.is-ssh-authenticated">
+                                        <Setter Property="Kind" Value="AccountCheck" />
+                                        <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidSuccess}" />
+                                    </Style>
+                                    <Style Selector="icons|MaterialIcon.is-ssh-not-authenticated">
+                                        <Setter Property="Kind" Value="AccountOff" />
+                                        <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}" />
+                                    </Style>
+                                </icons:MaterialIcon.Styles>
+                            </icons:MaterialIcon>
+
+                            <!--  Test Connection Button  -->
+                            <Button
+                                Grid.Column="1"
+                                Margin="-4"
+                                HorizontalAlignment="Right"
+                                Classes="theme-soft"
+                                Command="{Binding TestSshConnectionCommand}"
+                                Content="Test Connection">
+                                <Button.IsVisible>
+                                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                        <Binding Path="#SshCard.IsPointerOver" />
+                                        <Binding Path="IsSshAuthenticated" />
+                                    </MultiBinding>
+                                </Button.IsVisible>
+                            </Button>
+
+                        </Grid>
+
+                        <StackPanel IsVisible="{Binding IsConnected}" Spacing="8">
+                            <StackPanel.IsVisible>
+                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                    <Binding Path="!IsSshAuthenticated" />
+                                    <Binding Path="IsConnected" />
+                                </MultiBinding>
+                            </StackPanel.IsVisible>
+
+                            <!--  username  -->
+                            <controls:LabeledControl
+                                IsEnabled="{Binding !IsSshAuthenticated}"
+                                Label="Username"
+                                LabelWidth="60">
+                                <TextBox HorizontalAlignment="Stretch" Text="{Binding SshUser}" />
+                            </controls:LabeledControl>
+
+                            <!--  password  -->
+                            <controls:LabeledControl
+                                IsEnabled="{Binding !IsSshAuthenticated}"
+                                Label="Password"
+                                LabelWidth="60">
+                                <TextBox HorizontalAlignment="Stretch" Text="{Binding SshPassword}" />
+                            </controls:LabeledControl>
+
+                            <!--  Test Connection Button  -->
+                            <Button
+                                Margin="0,2,0,0"
+                                HorizontalAlignment="Right"
+                                Classes="theme-soft"
+                                Command="{Binding TestSshConnectionCommand}"
+                                Content="Test Connection"
+                                IsVisible="{Binding !IsSshAuthenticated}" />
+
+                        </StackPanel>
+
+
+                    </StackPanel>
+                </Border>
+
+                <!--  Camera Card  -->
+                <Border
+                    Name="CameraCard"
+                    Classes="card"
+                    IsEnabled="{Binding IsConnected}">
+                    <Grid>
+
+                        <!--  Subtle gradient overlay  -->
+                        <actipro:MeshGradientPresenter Margin="-12" IsVisible="{Binding IsCameraConnected}">
+                            <actipro:MeshGradientPresenter.Styles>
+                                <Style Selector="actipro|MeshGradientPresenter">
+                                    <Style.Animations>
+                                        <Animation IterationCount="INFINITE" Duration="0:0:3">
+                                            <KeyFrame Cue="0%">
+                                                <Setter Property="Opacity" Value="1.0" />
+                                            </KeyFrame>
+                                            <KeyFrame Cue="50%">
+                                                <Setter Property="Opacity" Value="0.3" />
+                                            </KeyFrame>
+                                            <KeyFrame Cue="100%">
+                                                <Setter Property="Opacity" Value="1.0" />
+                                            </KeyFrame>
+                                        </Animation>
+                                    </Style.Animations>
+                                </Style>
+                            </actipro:MeshGradientPresenter.Styles>
+                            <actipro:MeshGradientNode Center="100%, 0%" Color="#304CAF50" />
+                            <actipro:MeshGradientNode Center="0%, 100%" Color="#00000000" />
+                        </actipro:MeshGradientPresenter>
+
+                        <actipro:MeshGradientPresenter Margin="-12" IsVisible="{Binding !IsCameraConnected}">
+                            <actipro:MeshGradientPresenter.Styles>
+                                <Style Selector="actipro|MeshGradientPresenter">
+                                    <Style.Animations>
+                                        <Animation IterationCount="INFINITE" Duration="0:0:3">
+                                            <KeyFrame Cue="0%">
+                                                <Setter Property="Opacity" Value="1.0" />
+                                            </KeyFrame>
+                                            <KeyFrame Cue="50%">
+                                                <Setter Property="Opacity" Value="0.3" />
+                                            </KeyFrame>
+                                            <KeyFrame Cue="100%">
+                                                <Setter Property="Opacity" Value="1.0" />
+                                            </KeyFrame>
+                                        </Animation>
+                                    </Style.Animations>
+                                </Style>
+                            </actipro:MeshGradientPresenter.Styles>
+                            <actipro:MeshGradientNode Center="100%, 0%" Color="#30F44336" />
+                            <actipro:MeshGradientNode Center="0%, 100%" Color="#00000000" />
+                        </actipro:MeshGradientPresenter>
+
+                        <StackPanel>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Spacing="3">
+                                    <TextBlock
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Foreground="{StaticResource TextBrush}"
+                                        Text="Camera Server" />
+                                    <TextBlock
+                                        Margin="0,0,0,1"
+                                        VerticalAlignment="Bottom"
+                                        FontSize="11"
+                                        FontWeight="Light"
+                                        Opacity="0.4"
+                                        Text="over HTTP" />
+                                </StackPanel>
+
+                                <icons:MaterialIcon
+                                    Grid.Column="1"
+                                    Width="17"
+                                    Height="17"
+                                    VerticalAlignment="Center"
+                                    Classes.is-camera-connected="{Binding IsCameraConnected}"
+                                    Classes.is-camera-not-connected="{Binding !IsCameraConnected}">
+                                    <icons:MaterialIcon.Styles>
+                                        <Style Selector="icons|MaterialIcon.is-camera-connected">
+                                            <Setter Property="Kind" Value="LanCheck" />
+                                            <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidSuccess}" />
+                                        </Style>
+                                        <Style Selector="icons|MaterialIcon.is-camera-not-connected">
+                                            <Setter Property="Kind" Value="LanDisconnect" />
+                                            <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}" />
+                                        </Style>
+                                    </icons:MaterialIcon.Styles>
+                                </icons:MaterialIcon>
+
+                                <Button
+                                    Grid.Column="1"
+                                    Margin="-4"
+                                    HorizontalAlignment="Right"
+                                    Classes="theme-soft danger"
+                                    Command="{Binding DisconnectCameraCommand}"
+                                    Content="Disconnect">
+                                    <Button.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="#CameraCard.IsPointerOver" />
+                                            <Binding Path="IsCameraConnected" />
+                                        </MultiBinding>
+                                    </Button.IsVisible>
+                                </Button>
+
+                            </Grid>
+
+                            <StackPanel Spacing="8">
+
+                                <!--  Camera Configuration (disabled when not connected to RapidServer)  -->
+                                <StackPanel Margin="0,12,0,0" Spacing="8">
+                                    <StackPanel.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="!IsCameraConnected" />
+                                            <Binding Path="IsConnected" />
+                                        </MultiBinding>
+                                    </StackPanel.IsVisible>
+
+                                    <!--  Camera Port  -->
+                                    <controls:LabeledControl
+                                        IsEnabled="{Binding !IsCameraConnected}"
+                                        Label="Port"
+                                        LabelWidth="60">
+                                        <TextBox
+                                            IsEnabled="{Binding !IsCameraConnected}"
+                                            Text="{Binding CameraPort}"
+                                            ToolTip.Tip="Camera server port"
+                                            Watermark="50080" />
+                                    </controls:LabeledControl>
+
+                                    <!--  Connect/Disconnect Button  -->
+                                    <Button
+                                        Margin="0,2,0,0"
+                                        HorizontalAlignment="Right"
+                                        Classes="theme-soft success"
+                                        Command="{Binding ConnectCameraCommand}"
+                                        Content="Connect"
+                                        IsEnabled="{Binding IsConnected}"
+                                        IsVisible="{Binding !IsCameraConnected}" />
+
+                                </StackPanel>
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </Grid>
+                </Border>
+
+            </StackPanel>
+
+            <!--  Output Card  -->
+            <Border
+                Name="OutputCardBorder"
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="0,0,12,0"
+                VerticalAlignment="Bottom"
+                Background="#50000000"
+                Classes="card">
+
+                <StackPanel Spacing="8">
+                    <Grid Margin="0,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            Grid.Column="0"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextBrush}"
+                            Text="Output" />
+
+                        <!--  Clear Button  -->
+                        <Button
+                            Grid.Column="1"
+                            Margin="0,-16,-9,0"
+                            Padding="4,4,3,3"
+                            Classes="theme-subtle"
+                            Command="{Binding ClearLogOutputCommand}"
+                            Opacity="0.5"
+                            ToolTip.Tip="Clear output">
+                            <Button.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </Style>
+                                <Style Selector="Border#OutputCardBorder:pointerover Button">
+                                    <Setter Property="IsVisible" Value="True" />
+                                </Style>
+                            </Button.Styles>
+                            <icons:MaterialIcon Kind="Close" />
+                        </Button>
+                    </Grid>
+
+                    <ScrollViewer
+                        MaxHeight="280"
+                        Margin="0,0,-17,0"
+                        behaviors:ScrollToEndBehavior.IsEnabled="True">
+                        <TextBox
+                            Margin="0,0,0,0"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="11"
+                            IsReadOnly="True"
+                            ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                            Text="{Binding LogOutput}"
+                            TextWrapping="WrapWithOverflow"
+                            Watermark="App output will appear here.." />
+                    </ScrollViewer>
+
+                </StackPanel>
+            </Border>
+
+            <!--  CAMERA - MAIN  -->
+            <Grid
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="0,0,12,0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                RowDefinitions="* auto *">
+
+                <!--  cards  -->
+                <ItemsControl
+                    Grid.Row="0"
+                    HorizontalAlignment="Center"
+                    IsVisible="False"
+                    ItemsSource="{Binding Tasks}"
+                    ZIndex="0">
+
+                    <ItemsControl.Styles>
+
+                        <Style Selector="TextBlock.title">
+                            <Setter Property="FontSize" Value="11" />
+                        </Style>
+
+                        <Style Selector="TextBlock.value">
+                            <Setter Property="FontSize" Value="16" />
+                        </Style>
+
+                        <Style Selector="TextBlock.unit">
+                            <Setter Property="FontSize" Value="10" />
+                            <Setter Property="VerticalAlignment" Value="Bottom" />
+                        </Style>
+
+                    </ItemsControl.Styles>
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Classes="card" Classes.disabled="{Binding State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Disabled'}">
+                                <Border.Styles>
+                                    <Style Selector="Border.disabled">
+                                        <Setter Property="Opacity" Value="0.5" />
+                                    </Style>
+                                </Border.Styles>
+
+                                <StackPanel Spacing="0">
+
+                                    <!--  title  -->
+                                    <StackPanel Spacing="0">
+
+                                        <!--  top row  -->
+                                        <Grid>
+
+                                            <StackPanel
+                                                Grid.Column="0"
+                                                Orientation="Horizontal"
+                                                Spacing="3">
+                                                <TextBlock
+                                                    FontSize="14"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding Function}" />
+                                                <TextBlock
+                                                    Margin="0,0,0,1"
+                                                    VerticalAlignment="Bottom"
+                                                    FontSize="11"
+                                                    FontWeight="Light"
+                                                    Opacity="0.4"
+                                                    Text="RTTask" />
+                                            </StackPanel>
+
+                                            <TextBlock
+                                                Margin="0,0,0,1"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Bottom"
+                                                FontSize="11"
+                                                FontWeight="Light"
+                                                IsVisible="False"
+                                                Text="{Binding State}" />
+
+                                        </Grid>
+
+                                        <!--  bottom row  -->
+                                        <StackPanel
+                                            Grid.Column="0"
+                                            HorizontalAlignment="Right"
+                                            IsVisible="False"
+                                            Orientation="Horizontal"
+                                            Spacing="3">
+
+                                            <TextBlock
+                                                Classes="Mono label unit"
+                                                Text="{Binding ExecutionCount, StringFormat=N0}"
+                                                ToolTip.ShowDelay="0"
+                                                ToolTip.Tip="Cycle count" />
+
+                                            <TextBlock
+                                                Classes="Mono label unit"
+                                                FontSize="10"
+                                                Text="•" />
+
+                                            <TextBlock
+                                                Classes="Mono label unit"
+                                                ToolTip.ShowDelay="0"
+                                                ToolTip.Tip="Runtime">
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{x:Static resources:Converters.ExecutionCountPeriodToRuntimeConverter}">
+                                                        <Binding Path="ExecutionCount" />
+                                                        <Binding Path="Period" />
+                                                        <Binding Path="$parent[UserControl].DataContext.ControllerSampleRate_khz" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+
+                                        </StackPanel>
+
+                                    </StackPanel>
+
+                                    <TextBlock IsVisible="False" Text="{Binding Id}" />
+
+                                    <!--  top fields  -->
+                                    <UniformGrid Margin="0,14,0,0" Columns="3">
+
+                                        <StackPanel Spacing="-2">
+                                            <TextBlock
+                                                Classes=" title"
+                                                FontWeight="SemiBold"
+                                                Foreground="#4CAF50"
+                                                Text="Cycle" />
+
+                                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                                <TextBlock Classes="Mono value" Text="{Binding Period, StringFormat=N0}" />
+                                                <TextBlock Classes="label unit" Text="ms" />
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Spacing="-2">
+                                            <TextBlock
+                                                Classes="title"
+                                                FontWeight="Medium"
+                                                Foreground="#64B5F6"
+                                                Text="Average" />
+
+                                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                                <TextBlock Classes="Mono value" Text="{Binding ExecutionTimeMean, StringFormat=N4}" />
+                                                <TextBlock Classes="label unit" Text="ms" />
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Spacing="-2">
+                                            <TextBlock
+                                                Classes=" title"
+                                                FontWeight="SemiBold"
+                                                Foreground="#F44336"
+                                                Text="Max" />
+
+                                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                                <TextBlock Classes="Mono value" Text="{Binding ExecutionTimeMax, StringFormat=N4}" />
+                                                <TextBlock Classes="label unit" Text="ms" />
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                    </UniformGrid>
+
+                                    <!--  progress/goal bar  -->
+                                    <Panel Margin="0,0,0,0">
+                                        <controls:ProgressGoalChart
+                                            Margin="0,4,0,4"
+                                            Average="{Binding ExecutionTimeMean}"
+                                            Maximum="{Binding ExecutionTimeMax}"
+                                            Target="{Binding Period}" />
+                                    </Panel>
+
+                                    <!--  bottom fields  -->
+                                    <UniformGrid Margin="0,12,0,0" Columns="3">
+
+                                        <StackPanel Spacing="-2">
+                                            <TextBlock Classes="label title" Text="Start delta avg" />
+
+                                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                                <TextBlock Classes="Mono " Text="{Binding StartTimeDeltaMean, StringFormat=N4}" />
+                                                <TextBlock Classes="label unit" Text="ms" />
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Spacing="-2">
+                                            <TextBlock Classes="label title" Text="Runtime" />
+                                            <TextBlock Classes="Mono">
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{x:Static resources:Converters.ExecutionCountPeriodToRuntimeConverter}">
+                                                        <Binding Path="ExecutionCount" />
+                                                        <Binding Path="Period" />
+                                                        <Binding Path="$parent[UserControl].DataContext.ControllerSampleRate_khz" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <StackPanel Spacing="-2">
+                                            <TextBlock Classes="label title" Text="Cycles" />
+                                            <TextBlock Classes="Mono " Text="{Binding ExecutionCount, StringFormat=N0}" />
+                                        </StackPanel>
+
+                                    </UniformGrid>
+
+                                </StackPanel>
+                            </Border>
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!--  Image display area  -->
+                <Border
+                    Grid.Row="1"
+                    Padding="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    BorderThickness="1"
+                    Classes="card">
+
+                    <Border
+                        Margin="2"
+                        Padding="0"
+                        BorderThickness="0"
+                        Classes="card"
+                        Effect="{x:Null}">
+                        <Grid Background="#000000">
+
+                            <!--  Disconnected Card  -->
+                            <StackPanel
+                                Margin="18"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding !IsConnected}">
+                                <icons:MaterialIcon
+                                    Width="36"
+                                    Height="36"
+                                    Margin="0,-40,0,4"
+                                    Foreground="{StaticResource SubtleTextBrush}"
+                                    IsVisible="False"
+                                    Kind="LanDisconnect"
+                                    Opacity="0.45" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="18"
+                                    FontWeight="SemiBold"
+                                    Foreground="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}"
+                                    Text="Connection Required" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    FontSize="14"
+                                    Foreground="{StaticResource SubtleTextBrush}"
+                                    Opacity="0.7"
+                                    Text="Connect to the demo's RapidServer to view camera feeds" />
+                            </StackPanel>
+
+                            <!--  Camera Feeds  -->
+                            <Grid
+                                ClipToBounds="True"
+                                ColumnDefinitions="auto, *, auto, *, auto"
+                                Grid.IsSharedSizeScope="True"
+                                IsVisible="{Binding IsConnected}">
+
+                                <!--  Left spacing column  -->
+                                <Border Grid.Column="0" />
+
+                                <!--  render feed (640x480 aspect ratio)  -->
+                                <Border
+                                    Grid.Column="1"
+                                    Margin="8,8,4,8"
+                                    Padding="4,0,4,2"
+                                    Background="#40555555"
+                                    CornerRadius="2">
+                                    <Grid>
+
+                                        <Grid RowDefinitions="auto * auto" RowSpacing="2">
+
+                                            <!--  Header with size info  -->
+                                            <Grid
+                                                Grid.Row="0"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                ColumnDefinitions="* auto">
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="#00CCFF"
+                                                    Text="RENDER" />
+
+                                                <!--  Size information  -->
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    FontSize="10"
+                                                    Foreground="{StaticResource SubtleTextBrush}"
+                                                    Opacity="0.8"
+                                                    Text="{Binding IsCanvasResponsive, Converter={x:Static resources:Converters.BoolToSizeInfoConverter}}" />
+                                            </Grid>
+
+                                            <!--  render canvas with viewbox for scaling  -->
+                                            <Viewbox
+                                                Grid.Row="1"
+                                                Stretch="{Binding IsCanvasResponsive, Converter={x:Static resources:Converters.ResponsiveStretchConverter}}"
+                                                StretchDirection="Both">
+                                                <Canvas
+                                                    Name="RenderCanvas"
+                                                    Width="640"
+                                                    Height="480"
+                                                    Background="#2A2A2A">
+
+                                                    <!--  rendered ball - red ball  -->
+                                                    <Ellipse
+                                                        Fill="Red"
+                                                        Stroke="#000"
+                                                        StrokeThickness="1">
+
+                                                        <!--  ellipse size (diameter = radius * 2)  -->
+                                                        <Ellipse.Width>
+                                                            <Binding
+                                                                Converter="{x:Static resources:Converters.RadiusToDiameterConverter}"
+                                                                FallbackValue="10"
+                                                                Path="Program_BallRadius" />
+                                                        </Ellipse.Width>
+                                                        <Ellipse.Height>
+                                                            <Binding
+                                                                Converter="{x:Static resources:Converters.RadiusToDiameterConverter}"
+                                                                FallbackValue="10"
+                                                                Path="Program_BallRadius" />
+                                                        </Ellipse.Height>
+
+                                                        <!--  canvas position (center - radius for top-left positioning)  -->
+                                                        <Canvas.Left>
+                                                            <MultiBinding Converter="{x:Static resources:Converters.BallPositionToCenterOffsetConverter}">
+                                                                <Binding FallbackValue="320" Path="Program_BallX" />
+                                                                <Binding FallbackValue="10" Path="Program_BallRadius" />
+                                                            </MultiBinding>
+                                                        </Canvas.Left>
+                                                        <Canvas.Top>
+                                                            <MultiBinding Converter="{x:Static resources:Converters.BallYPositionToCenterOffsetConverter}">
+                                                                <Binding FallbackValue="240" Path="Program_BallY" />
+                                                                <Binding FallbackValue="10" Path="Program_BallRadius" />
+                                                            </MultiBinding>
+                                                        </Canvas.Top>
+                                                    </Ellipse>
+
+                                                    <!--  Center crosshair  -->
+                                                    <Line
+                                                        Stroke="#333333"
+                                                        StrokeDashArray="5,5"
+                                                        StrokeThickness="1"
+                                                        StartPoint="0,240"
+                                                        EndPoint="640,240" />
+                                                    <Line
+                                                        Stroke="#333333"
+                                                        StrokeDashArray="5,5"
+                                                        StrokeThickness="1"
+                                                        StartPoint="320,0"
+                                                        EndPoint="320,480" />
+
+                                                </Canvas>
+                                            </Viewbox>
+
+                                            <StackPanel
+                                                Grid.Row="2"
+                                                Margin="0,2,0,0"
+                                                Orientation="Horizontal"
+                                                Spacing="20">
+
+                                                <TextBlock
+                                                    Margin="0,1,0,-1"
+                                                    Classes="Mono"
+                                                    Foreground="{StaticResource TextBrush}"
+                                                    Text="{Binding Program_BallX, StringFormat='{}X: {0:F0}'}" />
+
+                                                <TextBlock
+                                                    Margin="0,1,0,-1"
+                                                    Classes="Mono"
+                                                    Foreground="{StaticResource TextBrush}"
+                                                    Text="{Binding Program_BallY, StringFormat='{}Y: {0:F0}'}" />
+
+                                                <TextBlock
+                                                    Margin="0,1,0,-1"
+                                                    Classes="Mono"
+                                                    Foreground="{StaticResource TextBrush}"
+                                                    Text="{Binding Program_BallRadius, StringFormat='{}Radius: {0:F0}'}" />
+
+                                                <TextBlock
+                                                    Margin="0,1,0,-1"
+                                                    Classes="Mono"
+                                                    Foreground="{StaticResource TextBrush}"
+                                                    Text="{Binding ControllerSampleRate_khz, StringFormat='{}Sample Rate: {0:F0} kHz'}" />
+                                            </StackPanel>
+
+                                        </Grid>
+
+                                    </Grid>
+                                </Border>
+
+                                <!--  Middle spacing column  -->
+                                <Border Grid.Column="2" />
+
+                                <!--  camera feed (640x480 aspect ratio)  -->
+                                <Border
+                                    Grid.Column="3"
+                                    Margin="4,8,8,8"
+                                    Padding="4,0,4,2"
+                                    Background="#40555555"
+                                    CornerRadius="2">
+                                    <Grid>
+
+                                        <Grid RowDefinitions="auto * auto" RowSpacing="2">
+
+                                            <!--  Header with size info  -->
+                                            <Grid
+                                                Grid.Row="0"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                ColumnDefinitions="* auto">
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="#00CCFF"
+                                                    Text="CAMERA" />
+
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal"
+                                                    Spacing="10">
+
+                                                    <!--  size information  -->
+                                                    <TextBlock
+                                                        Margin="0,0,3,0"
+                                                        VerticalAlignment="Center"
+                                                        FontSize="10"
+                                                        Foreground="{StaticResource SubtleTextBrush}"
+                                                        Opacity="0.8"
+                                                        Text="{Binding IsCanvasResponsive, Converter={x:Static resources:Converters.BoolToSizeInfoConverter}}" />
+
+                                                    <!--  camera streaming icon  -->
+                                                    <icons:MaterialIcon
+                                                        Grid.Column="1"
+                                                        Width="18"
+                                                        Height="18"
+                                                        Margin="0,0,0,-1"
+                                                        VerticalAlignment="Center"
+                                                        Background="Transparent"
+                                                        Classes.is-camera-not-streaming="{Binding !IsCameraStreaming}"
+                                                        Classes.is-camera-streaming="{Binding IsCameraStreaming}"
+                                                        ToolTip.ShowDelay="0">
+                                                        <icons:MaterialIcon.Styles>
+                                                            <Style Selector="icons|MaterialIcon.is-camera-streaming">
+                                                                <Setter Property="Kind" Value="VideoCheck" />
+                                                                <Setter Property="ToolTip.Tip" Value="Camera streaming ON" />
+                                                                <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidSuccess}" />
+                                                            </Style>
+                                                            <Style Selector="icons|MaterialIcon.is-camera-not-streaming">
+                                                                <Setter Property="Kind" Value="VideoOff" />
+                                                                <Setter Property="ToolTip.Tip" Value="Camera streaming OFF" />
+                                                                <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}" />
+                                                            </Style>
+                                                        </icons:MaterialIcon.Styles>
+                                                    </icons:MaterialIcon>
+
+                                                    <!--  camera ball detected  -->
+                                                    <icons:MaterialIcon
+                                                        Grid.Column="1"
+                                                        Width="14"
+                                                        Height="14"
+                                                        Margin="0,0,0,-1"
+                                                        VerticalAlignment="Center"
+                                                        Background="Transparent"
+                                                        Classes.ball-detected="{Binding CameraBallDetected}"
+                                                        Classes.ball-detected-n="{Binding !CameraBallDetected}"
+                                                        ToolTip.ShowDelay="0">
+                                                        <icons:MaterialIcon.Styles>
+                                                            <Style Selector="icons|MaterialIcon.ball-detected">
+                                                                <Setter Property="Kind" Value="CheckCircle" />
+                                                                <Setter Property="ToolTip.Tip" Value="Ball detected" />
+                                                                <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidSuccess}" />
+                                                            </Style>
+                                                            <Style Selector="icons|MaterialIcon.ball-detected-n">
+                                                                <Setter Property="Kind" Value="CloseCircle" />
+                                                                <Setter Property="ToolTip.Tip" Value="Ball not detected" />
+                                                                <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}" />
+                                                            </Style>
+                                                        </icons:MaterialIcon.Styles>
+                                                    </icons:MaterialIcon>
+
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <!--  camera canvas with viewbox for scaling  -->
+                                            <Viewbox
+                                                Grid.Row="1"
+                                                Stretch="{Binding IsCanvasResponsive, Converter={x:Static resources:Converters.ResponsiveStretchConverter}}"
+                                                StretchDirection="Both">
+                                                <Canvas
+                                                    Name="CameraCanvas"
+                                                    Width="640"
+                                                    Height="480"
+                                                    Background="#1A1A1A">
+
+                                                    <!--  Camera Image Display  -->
+                                                    <Image
+                                                        Name="CameraImage"
+                                                        Canvas.Left="0"
+                                                        Canvas.Top="0"
+                                                        Width="640"
+                                                        Height="480"
+                                                        Source="{Binding CameraImage}"
+                                                        Stretch="UniformToFill" />
+
+                                                    <!--  Ball Detection Overlay - only when ball is detected  -->
+                                                    <Ellipse
+                                                        Fill="Transparent"
+                                                        IsVisible="{Binding IsCameraStreaming}"
+                                                        Stroke="Lime"
+                                                        StrokeThickness="1">
+
+                                                        <!--  ellipse size (diameter = radius * 2)  -->
+                                                        <Ellipse.Width>
+                                                            <Binding
+                                                                Converter="{x:Static resources:Converters.RadiusToDiameterConverter}"
+                                                                FallbackValue="10"
+                                                                Path="CameraRadius" />
+                                                        </Ellipse.Width>
+                                                        <Ellipse.Height>
+                                                            <Binding
+                                                                Converter="{x:Static resources:Converters.RadiusToDiameterConverter}"
+                                                                FallbackValue="10"
+                                                                Path="CameraRadius" />
+                                                        </Ellipse.Height>
+
+                                                        <!--  canvas position (center - radius for top-left positioning)  -->
+                                                        <Canvas.Left>
+                                                            <MultiBinding Converter="{x:Static resources:Converters.BallPositionToCenterOffsetConverter}">
+                                                                <Binding FallbackValue="320" Path="CameraCenterX" />
+                                                                <Binding FallbackValue="10" Path="CameraRadius" />
+                                                            </MultiBinding>
+                                                        </Canvas.Left>
+                                                        <Canvas.Top>
+                                                            <MultiBinding Converter="{x:Static resources:Converters.BallYPositionToCenterOffsetConverter}">
+                                                                <Binding FallbackValue="240" Path="CameraCenterY" />
+                                                                <Binding FallbackValue="10" Path="CameraRadius" />
+                                                            </MultiBinding>
+                                                        </Canvas.Top>
+                                                    </Ellipse>
+
+                                                </Canvas>
+                                            </Viewbox>
+
+                                            <!--  Placeholder text when camera is not streaming  -->
+                                            <StackPanel
+                                                Grid.Row="1"
+                                                Margin="0,-6,0,0"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                IsVisible="{Binding !IsCameraStreaming}">
+
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="18"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}"
+                                                    Text="Streaming Required" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="14"
+                                                    Foreground="{StaticResource SubtleTextBrush}"
+                                                    Opacity="0.7"
+                                                    Text="Start camera stream to start seeing image data" />
+                                            </StackPanel>
+
+                                            <!--  Placeholder text when streaming but no image data  -->
+                                            <Border Grid.Row="1" IsVisible="{Binding IsCameraStreaming}">
+                                                <StackPanel
+                                                    Margin="0,-6,0,0"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    IsVisible="{Binding CameraImage, Converter={x:Static ObjectConverters.IsNull}}">
+
+                                                    <TextBlock
+                                                        HorizontalAlignment="Center"
+                                                        FontSize="18"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="{actipro:ThemeResource ControlBackgroundBrushSolidWarning}"
+                                                        Text="No Image Data" />
+                                                    <TextBlock
+                                                        HorizontalAlignment="Center"
+                                                        FontSize="14"
+                                                        Foreground="{StaticResource SubtleTextBrush}"
+                                                        Opacity="0.7"
+                                                        Text="Camera is streaming but no image data is being received" />
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!--  camera feed info  -->
+                                            <StackPanel
+                                                Grid.Row="2"
+                                                Margin="0,2,0,0"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal"
+                                                Spacing="20">
+                                                <TextBlock
+                                                    Margin="0,1,0,-1"
+                                                    Classes="Mono"
+                                                    Foreground="{StaticResource TextBrush}"
+                                                    Text="{Binding CameraCenterX, StringFormat='{}X: {0:N0}'}" />
+
+                                                <TextBlock
+                                                    Margin="0,1,0,-1"
+                                                    Classes="Mono"
+                                                    Foreground="{StaticResource TextBrush}"
+                                                    Text="{Binding CameraCenterY, StringFormat='{}Y: {0:N0}'}" />
+
+                                                <TextBlock
+                                                    Margin="0,1,0,-1"
+                                                    Classes="Mono"
+                                                    Foreground="{StaticResource TextBrush}"
+                                                    Text="{Binding CameraRadius, StringFormat='{}Radius: {0:N0}'}" />
+
+                                                <TextBlock
+                                                    Margin="0,1,0,-1"
+                                                    Classes="Mono"
+                                                    Text="{Binding CameraFrameNumber, FallbackValue='-', StringFormat='Frames: {0:N0}'}" />
+
+                                                <TextBlock
+                                                    Margin="0,1,0,-1"
+                                                    Classes="Mono"
+                                                    Text="{Binding Program_CameraFps, FallbackValue=0, StringFormat='FPS: {0:F1}'}" />
+
+
+                                            </StackPanel>
+
+                                        </Grid>
+
+                                    </Grid>
+                                </Border>
+
+                                <!--  Right spacing column  -->
+                                <Border Grid.Column="4" />
+
+                            </Grid>
+
+                        </Grid>
+                    </Border>
+
+                </Border>
+
+                <!--  action buttons  -->
+                <Border
+                    Grid.Row="2"
+                    Padding="8.5"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Classes="card"
+                    IsVisible="{Binding IsConnected}">
+                    <StackPanel
+                        Margin="0"
+                        HorizontalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="6">
+
+                        <!--  Start button  -->
+                        <Button
+                            HorizontalAlignment="Stretch"
+                            Classes="theme-soft success"
+                            Command="{Binding ProgramRunCommand}"
+                            IsVisible="{Binding !IsProgramRunning}"
+                            ToolTip.Tip="{Binding SshRunCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <icons:MaterialIcon
+                                    Width="20"
+                                    Height="20"
+                                    Kind="CogPlayOutline" />
+                                <TextBlock VerticalAlignment="Center" Text="Configure RMP &amp; Run Tasks" />
+                            </StackPanel>
+                        </Button>
+
+                        <!--  Kill button  -->
+                        <Button
+                            HorizontalAlignment="Stretch"
+                            Classes="theme-soft danger"
+                            Command="{Binding ProgramStopCommand}"
+                            IsVisible="{Binding IsProgramRunning}"
+                            ToolTip.Tip="Kill Program (RTTaskManager.Shutdown)">
+                            <StackPanel Orientation="Horizontal" Spacing="0">
+                                <icons:MaterialIcon
+                                    Width="16"
+                                    Height="16"
+                                    Kind="Skull" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    IsVisible="False"
+                                    Text="Kill Program" />
+                            </StackPanel>
+                        </Button>
+
+                        <!--  Pause/Resume button  -->
+                        <Panel IsVisible="False">
+                            <!--  Pause  -->
+                            <Button
+                                HorizontalAlignment="Stretch"
+                                Classes="theme-soft accent"
+                                Command="{Binding ToggleMotionPauseCommand}"
+                                IsVisible="{Binding !IsProgramPaused}">
+                                <StackPanel Orientation="Horizontal" Spacing="2">
+                                    <icons:MaterialIcon
+                                        Width="19"
+                                        Height="19"
+                                        Kind="Pause" />
+                                    <TextBlock VerticalAlignment="Center" Text="Pause Program" />
+                                </StackPanel>
+                            </Button>
+
+                            <!--  Resume  -->
+                            <Button
+                                HorizontalAlignment="Stretch"
+                                Classes="theme-soft success"
+                                Command="{Binding ToggleMotionPauseCommand}"
+                                IsVisible="{Binding IsProgramPaused}">
+                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                    <icons:MaterialIcon
+                                        Width="20"
+                                        Height="20"
+                                        Kind="PlayOutline" />
+                                    <TextBlock VerticalAlignment="Center" Text="Resume Program" />
+                                </StackPanel>
+                            </Button>
+                        </Panel>
+
+                        <!--  Separator  -->
+                        <Border
+                            Width="1"
+                            Height="24"
+                            Margin="8,0"
+                            Background="{StaticResource SubtleTextBrush}"
+                            IsVisible="{Binding IsProgramRunning}"
+                            Opacity="0.1" />
+
+                        <!--  Motion Enable/Disable Toggle  -->
+                        <ToggleButton
+                            HorizontalAlignment="Stretch"
+                            Classes="theme-subtle"
+                            Classes.danger="{Binding !Program_IsMotionEnabled}"
+                            Classes.success="{Binding Program_IsMotionEnabled}"
+                            Command="{Binding ToggleProgramMotionEnabledCommand}"
+                            CommandParameter="{Binding $self.IsChecked}"
+                            IsChecked="{Binding Program_IsMotionEnabled, FallbackValue=False, TargetNullValue=False}"
+                            IsEnabled="{Binding Global_IsMotionEnabledValid}"
+                            IsVisible="{Binding IsProgramRunning}"
+                            ToolTip.Tip="Enable/Disable Motion Control">
+                            <ToggleButton.Styles>
+                                <!--  Unchecked (Motion Disabled)  -->
+                                <Style Selector="ToggleButton">
+                                    <Setter Property="Content">
+                                        <Template>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <icons:MaterialIcon
+                                                    Width="15"
+                                                    Height="15"
+                                                    Kind="CircleOffOutline" />
+                                                <TextBlock VerticalAlignment="Center" Text="Motion" />
+                                            </StackPanel>
+                                        </Template>
+                                    </Setter>
+                                </Style>
+                                <!--  Checked (Motion Enabled)  -->
+                                <Style Selector="ToggleButton:checked">
+                                    <Setter Property="Content">
+                                        <Template>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <icons:MaterialIcon
+                                                    Width="15"
+                                                    Height="15"
+                                                    Kind="CircleSlice8" />
+                                                <TextBlock VerticalAlignment="Center" Text="Motion" />
+                                            </StackPanel>
+                                        </Template>
+                                    </Setter>
+                                </Style>
+                            </ToggleButton.Styles>
+                        </ToggleButton>
+
+                        <!--  Camera Toggle  -->
+                        <ToggleButton
+                            HorizontalAlignment="Stretch"
+                            Classes="theme-subtle"
+                            Classes.danger="{Binding !IsCameraStreaming}"
+                            Classes.success="{Binding IsCameraStreaming}"
+                            Command="{Binding ToggleCameraStreamCommand}"
+                            IsChecked="{Binding IsCameraStreaming, Mode=OneWay, FallbackValue=False, TargetNullValue=False}"
+                            IsEnabled="{Binding IsCameraConnected}"
+                            IsVisible="{Binding IsProgramRunning}"
+                            ToolTip.Tip="Start/Stop Camera Stream">
+                            <ToggleButton.Styles>
+                                <!--  Unchecked (Camera Off)  -->
+                                <Style Selector="ToggleButton">
+                                    <Setter Property="Content">
+                                        <Template>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <icons:MaterialIcon
+                                                    Width="16"
+                                                    Height="16"
+                                                    Kind="VideoOff" />
+                                                <TextBlock VerticalAlignment="Center" Text="Camera" />
+                                            </StackPanel>
+                                        </Template>
+                                    </Setter>
+                                </Style>
+                                <!--  Checked (Camera On)  -->
+                                <Style Selector="ToggleButton:checked">
+                                    <Setter Property="Content">
+                                        <Template>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <icons:MaterialIcon
+                                                    Width="16"
+                                                    Height="16"
+                                                    Kind="Video" />
+                                                <TextBlock VerticalAlignment="Center" Text="Camera" />
+                                            </StackPanel>
+                                        </Template>
+                                    </Setter>
+                                </Style>
+                            </ToggleButton.Styles>
+                        </ToggleButton>
+
+                        <!--  Separator  -->
+                        <Border
+                            Width="1"
+                            Height="24"
+                            Margin="8,0"
+                            Background="{StaticResource SubtleTextBrush}"
+                            IsVisible="{Binding IsProgramRunning}"
+                            Opacity="0.1" />
+
+                        <!--  is responsive  -->
+                        <ToggleButton
+                            HorizontalAlignment="Stretch"
+                            Classes="theme-subtle"
+                            IsChecked="{Binding IsCanvasResponsive}">
+                            <ToggleButton.Styles>
+
+                                <!--  fixed size  -->
+                                <Style Selector="ToggleButton">
+                                    <Setter Property="ToolTip.Tip" Value="Fixed layout" />
+                                    <Setter Property="Content">
+                                        <Template>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <icons:MaterialIcon
+                                                    Width="16"
+                                                    Height="16"
+                                                    Kind="ArrowCollapse" />
+                                                <TextBlock VerticalAlignment="Center" Text="Layout" />
+                                            </StackPanel>
+                                        </Template>
+                                    </Setter>
+                                </Style>
+
+                                <!--  responsive size  -->
+                                <Style Selector="ToggleButton:checked">
+                                    <Setter Property="ToolTip.Tip" Value="Responsive layout" />
+                                    <Setter Property="Content">
+                                        <Template>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <icons:MaterialIcon
+                                                    Width="16"
+                                                    Height="16"
+                                                    Kind="ArrowExpand" />
+                                                <TextBlock VerticalAlignment="Center" Text="Layout" />
+                                            </StackPanel>
+                                        </Template>
+                                    </Setter>
+                                </Style>
+
+                            </ToggleButton.Styles>
+                        </ToggleButton>
+                    </StackPanel>
+                </Border>
+
+            </Grid>
+
+            <!--  Right sidebar - stacked cards  -->
+            <TabControl
+                Grid.Row="1"
+                Grid.Column="2"
+                BorderThickness="0"
+                IsVisible="{Binding IsProgramRunning}">
+                <TabControl.Styles>
+
+                    <Style Selector="TabControl">
+                        <Setter Property="Padding" Value="0" />
+                    </Style>
+
+                    <Style Selector="TabItem">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Padding" Value="0 0 12 12" />
+                    </Style>
+
+                    <Style Selector="TabItem &gt; TextBlock">
+                        <Setter Property="FontSize" Value="12" />
+                    </Style>
+
+                    <Style Selector="TabItem:selected /template/ Border#PART_SelectedPipe, TabItem:pointerover /template/ Border#PART_SelectedPipe">
+                        <Setter Property="Height" Value="0" />
+                    </Style>
+
+                    <Style Selector="TabItem:not(:selected)">
+                        <Setter Property="Opacity" Value="0.5" />
+                    </Style>
+
+                    <Style Selector="TabItem:pointerover:not(:selected)">
+                        <Setter Property="Opacity" Value="0.75" />
+                    </Style>
+
+                    <Style Selector="TabItem:selected">
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                        <Setter Property="BorderThickness" Value="0" />
+                    </Style>
+
+                </TabControl.Styles>
+
+                <TabItem Header="Configuration">
+                    <ScrollViewer>
+                        <StackPanel
+                            Margin="0"
+                            VerticalAlignment="Top"
+                            Spacing="12">
+
+                            <!--  RMP Staus Card  -->
+                            <Border Classes="card">
+                                <StackPanel IsEnabled="{Binding IsConnected}">
+
+                                    <TextBlock
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Foreground="{StaticResource TextBrush}"
+                                        Text="RMP Status" />
+
+                                    <StackPanel
+                                        Margin="0,12,0,0"
+                                        IsVisible="{Binding IsConnected}"
+                                        Spacing="12">
+
+                                        <!--  controller  -->
+                                        <controls:StatusLabel
+                                            Title="Controller"
+                                            IsActive="{Binding ControllerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            TitleOpacity="1">
+                                            <controls:StatusLabel.Styles>
+                                                <Style Selector="controls|StatusLabel[IsActive=true]">
+                                                    <Setter Property="Value" Value="Created" />
+                                                </Style>
+                                                <Style Selector="controls|StatusLabel[IsActive=false]">
+                                                    <Setter Property="Value" Value="Not created" />
+                                                </Style>
+                                            </controls:StatusLabel.Styles>
+                                        </controls:StatusLabel>
+
+                                        <controls:StatusLabel
+                                            Title="Sample Rate [kHz]"
+                                            Margin="0,-10,0,0"
+                                            IsEnabled="{Binding ControllerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsMonoFont="True"
+                                            Value="{Binding ControllerSampleRate_khz, FallbackValue='-', StringFormat=N0}" />
+
+                                        <controls:StatusLabel
+                                            Title="Counter"
+                                            Margin="0,-10,0,0"
+                                            IsEnabled="{Binding ControllerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsMonoFont="True"
+                                            Value="{Binding ControllerStatus.SampleCounter, FallbackValue='-', StringFormat=N0}" />
+
+                                        <!--  network  -->
+                                        <controls:StatusLabel
+                                            Title="EtherCAT Network"
+                                            IsActive="{Binding NetworkStatus.State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Operational', FallbackValue=False}"
+                                            IsEnabled="{Binding ControllerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            TitleOpacity="1"
+                                            Value="{Binding NetworkStatus.State, FallbackValue='-'}" />
+
+                                        <controls:StatusLabel
+                                            Title="Counter"
+                                            Margin="0,-10,0,0"
+                                            IsEnabled="{Binding NetworkStatus.State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Operational', FallbackValue=False}"
+                                            IsMonoFont="True"
+                                            IsValueVisible="{Binding $self.IsEnabled}"
+                                            Value="{Binding NetworkStatus.Counter, FallbackValue='-', StringFormat=N0}" />
+
+                                        <!--  taskmanager  -->
+                                        <controls:StatusLabel
+                                            Title="TaskManager"
+                                            IsActive="{Binding TaskManagerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsEnabled="{Binding ControllerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsValueVisible="{Binding $self.IsEnabled}"
+                                            TitleOpacity="1"
+                                            Value="{Binding TaskManagerStatus.State, FallbackValue='-'}" />
+
+                                        <controls:StatusLabel
+                                            Title="Cycles"
+                                            Margin="0,-10,0,0"
+                                            IsEnabled="{Binding NetworkStatus.State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Operational', FallbackValue=False}"
+                                            IsMonoFont="True"
+                                            IsValueVisible="{Binding $self.IsEnabled}"
+                                            Value="{Binding TaskManagerStatus.CycleCount, FallbackValue='-', StringFormat=N0}" />
+
+                                        <controls:StatusLabel
+                                            Title="Start delta max"
+                                            Margin="0,-10,0,0"
+                                            IsEnabled="{Binding NetworkStatus.State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Operational', FallbackValue=False}"
+                                            IsMonoFont="True"
+                                            IsValueVisible="{Binding $self.IsEnabled}"
+                                            Value="{Binding TaskManagerStatus.StartTimeDeltaMax, FallbackValue='-', StringFormat=N0}" />
+
+                                        <controls:StatusLabel
+                                            Title="RealTimeTasks"
+                                            Margin="0,-10,0,0"
+                                            IsEnabled="{Binding ControllerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsMonoFont="True"
+                                            IsValueVisible="{Binding $self.IsEnabled}"
+                                            Value="{Binding TaskManagerStatus.TaskIds.Count, FallbackValue='-'}" />
+
+                                        <!--  globals  -->
+                                        <controls:StatusLabel
+                                            Title="Global Variables"
+                                            IsActive="{Binding TaskManagerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsEnabled="{Binding ControllerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsValueVisible="False"
+                                            TitleOpacity="1" />
+
+                                        <ItemsControl
+                                            Margin="0,-10,0,0"
+                                            HorizontalAlignment="Stretch"
+                                            FontSize="12"
+                                            ItemsSource="{Binding GlobalValues}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,2,0,0" ColumnDefinitions="*,auto">
+                                                        <TextBlock Opacity=".6" Text="{Binding Name}" />
+
+                                                        <!--  numeric  -->
+                                                        <TextBlock
+                                                            Grid.Column="1"
+                                                            Margin="0,-1,0,1"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Bottom"
+                                                            Classes="Mono"
+                                                            IsVisible="{Binding IsNumeric}"
+                                                            Text="{Binding Value}" />
+
+                                                        <!--  bool  -->
+                                                        <icons:MaterialIcon
+                                                            Grid.Column="1"
+                                                            Width="14"
+                                                            Height="14"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Bottom"
+                                                            Classes.is-false="{Binding Value, Converter={x:Static resources:Converters.StringToNotBoolConverter}}"
+                                                            Classes.is-true="{Binding Value, Converter={x:Static resources:Converters.StringToBoolConverter}}"
+                                                            IsVisible="{Binding !IsNumeric}">
+                                                            <icons:MaterialIcon.Styles>
+
+                                                                <Style Selector="icons|MaterialIcon.is-true">
+                                                                    <Setter Property="Kind" Value="CheckBold" />
+                                                                    <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidSuccess}" />
+                                                                    <Setter Property="Margin" Value="0 0 -1 2" />
+                                                                </Style>
+
+                                                                <Style Selector="icons|MaterialIcon.is-false">
+                                                                    <Setter Property="Kind" Value="CloseBold" />
+                                                                    <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}" />
+                                                                    <Setter Property="Margin" Value="0 0 -2 2" />
+                                                                </Style>
+
+                                                            </icons:MaterialIcon.Styles>
+                                                        </icons:MaterialIcon>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!--  Mappings Card  -->
+                            <Border Classes="card" IsEnabled="{Binding IsConnected}">
+                                <Border.Styles>
+
+                                    <Style Selector="icons|MaterialIcon">
+                                        <Setter Property="Margin" Value="0 0 0 -2" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                    </Style>
+
+                                    <Style Selector="icons|MaterialIcon[Tag=True]">
+                                        <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidSuccess}" />
+                                        <Setter Property="Kind" Value="Link" />
+                                        <Setter Property="ToolTip.Tip" Value="Linked to a global" />
+                                        <Setter Property="ToolTip.ShowDelay" Value="0" />
+                                    </Style>
+
+                                    <Style Selector="icons|MaterialIcon[Tag=False]">
+                                        <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}" />
+                                        <Setter Property="Kind" Value="LinkOff" />
+                                        <Setter Property="ToolTip.Tip" Value="Not linked to a global" />
+                                        <Setter Property="ToolTip.ShowDelay" Value="0" />
+                                    </Style>
+
+                                    <Style Selector="AutoCompleteBox">
+                                        <Setter Property="Margin" Value="0 0 0 -1" />
+                                        <Setter Property="MinWidth" Value="120" />
+                                        <Setter Property="Padding" Value="2" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="FilterMode" Value="ContainsOrdinal" />
+                                        <Setter Property="MinimumPopulateDelay" Value="0" />
+                                        <Setter Property="MinimumPrefixLength" Value="0" />
+                                        <Setter Property="Watermark" Value="Select global.." />
+                                        <Setter Property="behaviors:AutoCompleteBehaviors.ShowSuggestionsOnClick" Value="True" />
+                                    </Style>
+
+                                    <Style Selector="controls|StatusLabel[IsActive=true]">
+                                        <!--<Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidSuccess}" />
+                                <Setter Property="TitleOpacity" Value="1" />
+                                <Setter Property="FontWeight" Value="Medium" />-->
+                                    </Style>
+
+                                    <Style Selector="controls|StatusLabel[IsActive=false]">
+                                        <!--  <Setter Property="Foreground" Value="{actipro:ThemeResource ControlBackgroundBrushSolidDanger}" /> -->
+                                        <Setter Property="TitleOpacity" Value="0.6" />
+                                    </Style>
+
+                                </Border.Styles>
+
+                                <Grid>
+                                    <!--  Main content  -->
+                                    <StackPanel>
+                                        <TextBlock
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Foreground="{StaticResource TextBrush}"
+                                            Text="Mappings" />
+
+                                        <StackPanel
+                                            Margin="0,12,0,0"
+                                            IsVisible="{Binding IsProgramRunning}"
+                                            Spacing="6">
+
+                                            <!--  ball x  -->
+                                            <DockPanel LastChildFill="True">
+                                                <controls:StatusLabel Title="Ball Center X" IsActive="{Binding Global_BallXValid}" />
+
+                                                <StackPanel
+                                                    HorizontalAlignment="Right"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+
+                                                    <AutoCompleteBox
+                                                        behaviors:AutoCompleteBehaviors.ShowSuggestionsOnClick="True"
+                                                        Classes="theme-soft"
+                                                        ItemsSource="{Binding GlobalValues}"
+                                                        Text="{Binding Global_BallX}"
+                                                        ValueMemberBinding="{Binding Name}">
+                                                        <AutoCompleteBox.InnerRightContent>
+                                                            <icons:MaterialIcon Tag="{Binding Global_BallXValid}" />
+                                                        </AutoCompleteBox.InnerRightContent>
+                                                    </AutoCompleteBox>
+
+                                                </StackPanel>
+                                            </DockPanel>
+
+                                            <!--  ball y  -->
+                                            <DockPanel LastChildFill="True">
+                                                <controls:StatusLabel Title="Ball Center Y" IsActive="{Binding Global_BallYValid}" />
+
+                                                <StackPanel
+                                                    HorizontalAlignment="Right"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+
+                                                    <AutoCompleteBox
+                                                        behaviors:AutoCompleteBehaviors.ShowSuggestionsOnClick="True"
+                                                        Classes="theme-soft"
+                                                        ItemsSource="{Binding GlobalValues}"
+                                                        Text="{Binding Global_BallY}"
+                                                        ValueMemberBinding="{Binding Name}">
+                                                        <AutoCompleteBox.InnerRightContent>
+                                                            <icons:MaterialIcon Tag="{Binding Global_BallYValid}" />
+                                                        </AutoCompleteBox.InnerRightContent>
+                                                    </AutoCompleteBox>
+
+                                                </StackPanel>
+                                            </DockPanel>
+
+                                            <!--  ball radius  -->
+                                            <DockPanel LastChildFill="True">
+                                                <controls:StatusLabel Title="Ball Radius" IsActive="{Binding Global_BallRadiusValid}" />
+
+                                                <StackPanel
+                                                    HorizontalAlignment="Right"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+
+                                                    <AutoCompleteBox
+                                                        behaviors:AutoCompleteBehaviors.ShowSuggestionsOnClick="True"
+                                                        Classes="theme-soft"
+                                                        ItemsSource="{Binding GlobalValues}"
+                                                        Text="{Binding Global_BallRadius}"
+                                                        ValueMemberBinding="{Binding Name}">
+                                                        <AutoCompleteBox.InnerRightContent>
+                                                            <icons:MaterialIcon Tag="{Binding Global_BallRadiusValid}" />
+                                                        </AutoCompleteBox.InnerRightContent>
+                                                    </AutoCompleteBox>
+
+                                                </StackPanel>
+                                            </DockPanel>
+
+                                            <!--  is motion enabled  -->
+                                            <DockPanel LastChildFill="True">
+                                                <controls:StatusLabel Title="Is Motion Enabled" IsActive="{Binding Global_IsMotionEnabledValid}" />
+
+                                                <StackPanel
+                                                    HorizontalAlignment="Right"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+
+                                                    <AutoCompleteBox
+                                                        behaviors:AutoCompleteBehaviors.ShowSuggestionsOnClick="True"
+                                                        Classes="theme-soft"
+                                                        ItemsSource="{Binding GlobalValues}"
+                                                        Text="{Binding Global_IsMotionEnabled}"
+                                                        ValueMemberBinding="{Binding Name}">
+                                                        <AutoCompleteBox.InnerRightContent>
+                                                            <icons:MaterialIcon Tag="{Binding Global_IsMotionEnabledValid}" />
+                                                        </AutoCompleteBox.InnerRightContent>
+                                                    </AutoCompleteBox>
+
+                                                </StackPanel>
+                                            </DockPanel>
+
+                                            <!--  current fpt  -->
+                                            <DockPanel LastChildFill="True">
+                                                <controls:StatusLabel Title="Camera FPS" IsActive="{Binding Global_IsCameraFpsValid}" />
+
+                                                <StackPanel
+                                                    HorizontalAlignment="Right"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+
+                                                    <AutoCompleteBox
+                                                        behaviors:AutoCompleteBehaviors.ShowSuggestionsOnClick="True"
+                                                        Classes="theme-soft"
+                                                        ItemsSource="{Binding GlobalValues}"
+                                                        Text="{Binding Global_CameraFps}"
+                                                        ValueMemberBinding="{Binding Name}">
+                                                        <AutoCompleteBox.InnerRightContent>
+                                                            <icons:MaterialIcon Tag="{Binding Global_IsCameraFpsValid}" />
+                                                        </AutoCompleteBox.InnerRightContent>
+                                                    </AutoCompleteBox>
+
+                                                </StackPanel>
+                                            </DockPanel>
+
+                                        </StackPanel>
+                                    </StackPanel>
+
+
+                                </Grid>
+                            </Border>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <TabItem x:Name="RmpRtTaskTabItem" Header="RMP RTTasks">
+                    <ScrollViewer>
+                        <StackPanel Spacing="12">
+                            <!--  TaskManager Card  -->
+                            <Border Classes="card">
+                                <StackPanel IsEnabled="{Binding IsConnected}">
+
+                                    <StackPanel
+                                        Margin="0"
+                                        IsVisible="{Binding IsConnected}"
+                                        Spacing="12">
+
+                                        <!--  taskmanager  -->
+                                        <controls:StatusLabel
+                                            Title="TaskManager"
+                                            IsActive="{Binding TaskManagerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsEnabled="{Binding ControllerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsValueVisible="{Binding $self.IsEnabled}"
+                                            TitleOpacity="1"
+                                            Value="{Binding TaskManagerStatus.State, FallbackValue='-'}" />
+
+                                        <controls:StatusLabel
+                                            Title="Cycles"
+                                            Margin="0,-10,0,0"
+                                            IsEnabled="{Binding NetworkStatus.State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Operational', FallbackValue=False}"
+                                            IsMonoFont="True"
+                                            IsValueVisible="{Binding $self.IsEnabled}"
+                                            Value="{Binding TaskManagerStatus.CycleCount, FallbackValue='-', StringFormat=N0}" />
+
+                                        <controls:StatusLabel
+                                            Title="Start delta max"
+                                            Margin="0,-10,0,0"
+                                            IsEnabled="{Binding NetworkStatus.State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Operational', FallbackValue=False}"
+                                            IsMonoFont="True"
+                                            IsValueVisible="{Binding $self.IsEnabled}"
+                                            Value="{Binding TaskManagerStatus.StartTimeDeltaMax, FallbackValue='-', StringFormat=N0}" />
+
+
+                                        <!--  tasks  -->
+                                        <controls:StatusLabel
+                                            Title="RealTimeTasks"
+                                            Margin="0,-10,0,0"
+                                            IsEnabled="{Binding ControllerStatus, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            IsMonoFont="True"
+                                            IsValueVisible="{Binding $self.IsEnabled}"
+                                            Value="{Binding TaskManagerStatus.TaskIds.Count, FallbackValue='-'}" />
+
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <ItemsControl ItemsSource="{Binding Tasks}">
+
+                                <ItemsControl.Styles>
+
+                                    <Style Selector="TextBlock.title">
+                                        <Setter Property="FontSize" Value="11" />
+                                    </Style>
+
+                                    <Style Selector="TextBlock.value">
+                                        <Setter Property="FontSize" Value="16" />
+                                    </Style>
+
+                                    <Style Selector="TextBlock.unit">
+                                        <Setter Property="FontSize" Value="10" />
+                                        <Setter Property="VerticalAlignment" Value="Bottom" />
+                                    </Style>
+
+                                </ItemsControl.Styles>
+
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="12" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Classes="card" Classes.disabled="{Binding State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Disabled'}">
+                                            <Border.Styles>
+                                                <Style Selector="Border.disabled">
+                                                    <Setter Property="Opacity" Value="0.65" />
+                                                </Style>
+                                            </Border.Styles>
+
+                                            <StackPanel Spacing="0">
+
+                                                <!--  title  -->
+                                                <StackPanel Spacing="0">
+
+                                                    <!--  top row  -->
+                                                    <Grid>
+
+                                                        <StackPanel
+                                                            Grid.Column="0"
+                                                            Orientation="Horizontal"
+                                                            Spacing="3">
+                                                            <TextBlock
+                                                                FontSize="14"
+                                                                FontWeight="SemiBold"
+                                                                Text="{Binding Function}" />
+                                                            <TextBlock
+                                                                Margin="0,0,0,1"
+                                                                VerticalAlignment="Bottom"
+                                                                FontSize="11"
+                                                                FontWeight="Light"
+                                                                IsVisible="False"
+                                                                Opacity="0.4"
+                                                                Text="RTTask" />
+                                                        </StackPanel>
+
+                                                        <TextBlock
+                                                            Margin="0,0,0,1"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Bottom"
+                                                            FontSize="11"
+                                                            FontWeight="Light"
+                                                            IsVisible="False"
+                                                            Text="{Binding State}" />
+
+                                                        <!--  right side  -->
+                                                        <StackPanel
+                                                            HorizontalAlignment="Right"
+                                                            Orientation="Horizontal"
+                                                            Spacing="6">
+
+                                                            <Panel
+                                                                Margin="0,0,-1,0"
+                                                                ToolTip.ShowDelay="0"
+                                                                ToolTip.Tip="{Binding Priority, StringFormat='{}Priority: {0}'}">
+                                                                <TextBlock
+                                                                    MinHeight="0"
+                                                                    Margin="0,-2,0,0"
+                                                                    Padding="0"
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center"
+                                                                    Classes="Mono"
+                                                                    FontSize="10"
+                                                                    FontWeight="Bold"
+                                                                    Foreground="#777"
+                                                                    Text="{Binding Priority, Converter={x:Static resources:Converters.TaskPriorityToShortStringConverter}}"
+                                                                    TextInputOptions.AutoCapitalization="True" />
+
+                                                                <controls:ProgressRing
+                                                                    Width="19"
+                                                                    Height="19"
+                                                                    Margin="-1,-3,-1,-1"
+                                                                    VerticalAlignment="Center"
+                                                                    AnimationDuration="1.25"
+                                                                    ArcAnimationDuration="1.75"
+                                                                    IsArcAnimationEnabled="True"
+                                                                    IsSpinning="True"
+                                                                    IsVisible="{Binding State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Waiting'}"
+                                                                    RingColor="#777"
+                                                                    RingThickness="" />
+                                                            </Panel>
+
+                                                            <icons:MaterialIcon
+                                                                Margin="-1,-2,-1,0"
+                                                                VerticalAlignment="Center"
+                                                                Foreground="#777"
+                                                                IsVisible="{Binding State, Converter={x:Static resources:Converters.StringEqualsParameterConverter}, ConverterParameter='Disabled'}"
+                                                                Kind="SkullCrossbones" />
+
+                                                        </StackPanel>
+
+                                                    </Grid>
+
+                                                    <!--  bottom row  -->
+                                                    <StackPanel
+                                                        Grid.Column="0"
+                                                        HorizontalAlignment="Right"
+                                                        IsVisible="False"
+                                                        Orientation="Horizontal"
+                                                        Spacing="3">
+
+                                                        <TextBlock
+                                                            Classes="Mono label unit"
+                                                            Text="{Binding ExecutionCount, StringFormat=N0}"
+                                                            ToolTip.ShowDelay="0"
+                                                            ToolTip.Tip="Cycle count" />
+
+                                                        <TextBlock
+                                                            Classes="Mono label unit"
+                                                            FontSize="10"
+                                                            Text="•" />
+
+                                                        <TextBlock
+                                                            Classes="Mono label unit"
+                                                            ToolTip.ShowDelay="0"
+                                                            ToolTip.Tip="Runtime">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding Converter="{x:Static resources:Converters.ExecutionCountPeriodToRuntimeConverter}">
+                                                                    <Binding Path="ExecutionCount" />
+                                                                    <Binding Path="Period" />
+                                                                    <Binding Path="$parent[UserControl].DataContext.ControllerSampleRate_khz" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+
+                                                    </StackPanel>
+
+                                                </StackPanel>
+
+                                                <TextBlock IsVisible="False" Text="{Binding Id}" />
+
+                                                <!--  top fields  -->
+                                                <UniformGrid Margin="0,14,0,0" Columns="3">
+
+                                                    <StackPanel Spacing="-2">
+                                                        <TextBlock
+                                                            Classes=" title"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="#4CAF50"
+                                                            Text="Cycle" />
+
+                                                        <StackPanel Orientation="Horizontal" Spacing="2">
+
+                                                            <TextBlock x:CompileBindings="False" Classes="Mono value">
+                                                                <TextBox.Text>
+                                                                    <MultiBinding Converter="{x:Static resources:Converters.DivisionConverter}">
+                                                                        <Binding Path="Period" />
+                                                                        <Binding Path="$parent[UserControl].DataContext.ControllerSampleRate_khz" />
+                                                                    </MultiBinding>
+                                                                </TextBox.Text>
+                                                            </TextBlock>
+
+                                                            <TextBlock Classes="label unit" Text="ms" />
+
+                                                        </StackPanel>
+                                                    </StackPanel>
+
+                                                    <StackPanel Spacing="-2">
+                                                        <TextBlock
+                                                            Classes="title"
+                                                            FontWeight="Medium"
+                                                            Foreground="#64B5F6"
+                                                            Text="Average" />
+
+                                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                                            <TextBlock Classes="Mono value" Text="{Binding ExecutionTimeMean, StringFormat=N4}" />
+                                                            <TextBlock Classes="label unit" Text="ms" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+
+                                                    <StackPanel Spacing="-2">
+                                                        <TextBlock
+                                                            Classes=" title"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="#F44336"
+                                                            Text="Max" />
+
+                                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                                            <TextBlock Classes="Mono value" Text="{Binding ExecutionTimeMax, StringFormat=N4}" />
+                                                            <TextBlock Classes="label unit" Text="ms" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+
+                                                </UniformGrid>
+
+                                                <!--  progress/goal bar  -->
+                                                <Panel Margin="0,0,0,0">
+                                                    <controls:ProgressGoalChart
+                                                        Margin="0,4,0,4"
+                                                        Average="{Binding ExecutionTimeMean}"
+                                                        Maximum="{Binding ExecutionTimeMax}"
+                                                        Target="{Binding Period}" />
+                                                </Panel>
+
+                                                <!--  bottom fields  -->
+                                                <UniformGrid Margin="0,12,0,0" Columns="3">
+
+                                                    <StackPanel Spacing="-2">
+                                                        <TextBlock Classes="label title" Text="Runtime" />
+                                                        <TextBlock Classes="Mono">
+                                                            <TextBlock.Text>
+                                                                <MultiBinding Converter="{x:Static resources:Converters.ExecutionCountPeriodToRuntimeConverter}">
+                                                                    <Binding Path="ExecutionCount" />
+                                                                    <Binding Path="Period" />
+                                                                    <Binding Path="$parent[UserControl].DataContext.ControllerSampleRate_khz" />
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+                                                    </StackPanel>
+
+                                                    <StackPanel Spacing="-2">
+                                                        <TextBlock Classes="label title" Text="Cycles" />
+                                                        <TextBlock Classes="Mono " Text="{Binding ExecutionCount, StringFormat=N0}" />
+                                                    </StackPanel>
+
+                                                    <StackPanel Spacing="-2">
+                                                        <TextBlock Classes="label title" Text="Start delta max" />
+
+                                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                                            <TextBlock Classes="Mono " Text="{Binding StartTimeDeltaMax, StringFormat=N4}" />
+                                                            <TextBlock Classes="label unit" Text="ms" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+
+                                                </UniformGrid>
+
+                                            </StackPanel>
+                                        </Border>
+
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+            </TabControl>
+
+            <Button
+                Grid.Row="1"
+                Grid.Column="2"
+                Margin="0,-2,0,0"
+                Padding="4"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Classes="theme-subtle"
+                Command="{Binding Tasks_TimingResetCommand}"
+                IsEnabled="{Binding !!TaskIds.Count}"
+                ToolTip.Tip="Reset timing metrics"
+                ZIndex="10">
+                <Button.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="IsProgramRunning" />
+                        <Binding Path="#RmpRtTaskTabItem.IsSelected" />
+                    </MultiBinding>
+                </Button.IsVisible>
+                <icons:MaterialIcon Kind="TimerRefreshOutline" />
+            </Button>
+
+        </Grid>
+
+    </ContentControl>
+</UserControl>

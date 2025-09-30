@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XMLSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ExpectedNodeCount>2</ExpectedNodeCount>
+  <ExpectedNodeTypes>
+    <RSINodeType>RSINodeTypeMITSUBISHI_MR_J5_TM</RSINodeType>
+    <RSINodeType>RSINodeTypeMITSUBISHI_MR_J5_TM</RSINodeType>
+  </ExpectedNodeTypes>
+  <NetworkStartTimeoutMilliseconds xsi:nil="true" />
+  <SampleRate>4000</SampleRate>
+  <AxisCount>2</AxisCount>
+  <MotionCount>3</MotionCount>
+  <UserLimitCount>0</UserLimitCount>
+  <RecorderCount>0</RecorderCount>
+  <RecorderBufferSize />
+  <CompensatorCount>0</CompensatorCount>
+  <CompensatorPointCount />
+  <AxisFrameBufferSize>
+    <int>1024</int>
+    <int>1024</int>
+  </AxisFrameBufferSize>
+  <MathBlockCount>0</MathBlockCount>
+  <XMLFiles>
+    <AxisXML>
+      <AxisNumber>0</AxisNumber>
+      <XMLFile>x.xml</XMLFile>
+    </AxisXML>
+    <AxisXML>
+      <AxisNumber>1</AxisNumber>
+      <XMLFile>y.xml</XMLFile>
+    </AxisXML>
+  </XMLFiles>
+  <MultiAxisXMLFiles>
+    <MultiAxisXML>
+      <MotionSupervisorIndex>2</MotionSupervisorIndex>
+      <XMLFile>multiaxis.xml</XMLFile>
+    </MultiAxisXML>
+  </MultiAxisXMLFiles>
+  <RTTaskManagers>
+    <RTTaskManager>
+      <RTTaskDirectory>/rsi</RTTaskDirectory>
+      <Platform>Linux</Platform>
+      <NodeName />
+      <CpuCore>2</CpuCore>
+      <UserLabel>LaserTracking</UserLabel>
+      <NoRmp>false</NoRmp>
+      <RTTasks>
+        <RTTask>
+          <FunctionName>Initialize</FunctionName>
+          <LibraryName>RTTaskFunctions</LibraryName>
+          <LibraryDirectory />
+          <UserLabel>Initialize</UserLabel>
+          <Priority>Lowest</Priority>
+          <Repeats>0</Repeats>
+          <Period>1</Period>
+          <Phase>0</Phase>
+          <EnableTiming>true</EnableTiming>
+        </RTTask>
+        <RTTask>
+          <FunctionName>DetectBall</FunctionName>
+          <LibraryName>RTTaskFunctions</LibraryName>
+          <LibraryDirectory />
+          <UserLabel>DetectBall</UserLabel>
+          <Priority>Medium</Priority>
+          <Repeats>-1</Repeats>
+          <Period>1</Period>
+          <Phase>0</Phase>
+          <EnableTiming>true</EnableTiming>
+        </RTTask>
+        <RTTask>
+          <FunctionName>MoveMotors</FunctionName>
+          <LibraryName>RTTaskFunctions</LibraryName>
+          <LibraryDirectory />
+          <UserLabel>MoveMotors</UserLabel>
+          <Priority>Highest</Priority>
+          <Repeats>-1</Repeats>
+          <Period>1</Period>
+          <Phase>0</Phase>
+          <EnableTiming>true</EnableTiming>
+        </RTTask>
+        <RTTask>
+          <FunctionName>OutputImage</FunctionName>
+          <LibraryName>RTTaskFunctions</LibraryName>
+          <LibraryDirectory />
+          <UserLabel>OutputImage</UserLabel>
+          <Priority>Low</Priority>
+          <Repeats>-1</Repeats>
+          <Period>66</Period>
+          <Phase>0</Phase>
+          <EnableTiming>true</EnableTiming>
+        </RTTask>
+        <RTTask>
+          <FunctionName>RecordTimingMetrics</FunctionName>
+          <LibraryName>RTTaskFunctions</LibraryName>
+          <LibraryDirectory />
+          <UserLabel>RecordTimingMetrics</UserLabel>
+          <Priority>High</Priority>
+          <Repeats>-1</Repeats>
+          <Period>1</Period>
+          <Phase>0</Phase>
+          <EnableTiming>true</EnableTiming>
+        </RTTask>
+      </RTTasks>
+    </RTTaskManager>
+  </RTTaskManagers>
+</XMLSettings>

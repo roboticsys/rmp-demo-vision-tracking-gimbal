@@ -1,0 +1,92 @@
+<UserControl
+    x:Class="RapidLaser.Controls.ProgressGoalChart"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel>
+        <Grid>
+            <!--  Background bar  -->
+            <Border
+                Height="30"
+                VerticalAlignment="Center"
+                Background="#90444444"
+                CornerRadius="1" />
+
+            <!--  Max line  -->
+            <Border
+                x:Name="MaxLine"
+                Width="4"
+                Height="36"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                BorderBrush="#000"
+                BorderThickness="1"
+                ClipToBounds="True"
+                CornerRadius="2"
+                ZIndex="0">
+                <Panel
+                    Width="2"
+                    Height="42"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Background="#F44336" />
+            </Border>
+
+            <!--  Average filled bar  -->
+            <Border
+                x:Name="AverageBar"
+                Height="30"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Background="#64B5F6"
+                CornerRadius="2" />
+
+            <!--  Target line  -->
+            <Border
+                x:Name="TargetLine"
+                Width="4"
+                Height="36"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                BorderBrush="#000"
+                BorderThickness="1"
+                ClipToBounds="True"
+                CornerRadius="2"
+                ZIndex="100">
+                <Panel
+                    Width="2"
+                    Height="42"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Background="#4CAF50" />
+            </Border>
+
+        </Grid>
+
+        <!--  Labels  -->
+        <Grid IsVisible="False">
+            <TextBlock
+                x:Name="TargetLabel"
+                HorizontalAlignment="Left"
+                FontSize="11"
+                Foreground="#4CAF50"
+                LineSpacing="0"
+                Text="Target: 100,000" />
+            <TextBlock
+                x:Name="AverageLabel"
+                HorizontalAlignment="Center"
+                FontSize="11"
+                Foreground="#64B5F6"
+                LineSpacing="0"
+                Text="Avg: 133,534" />
+            <TextBlock
+                x:Name="MaxLabel"
+                HorizontalAlignment="Right"
+                FontSize="11"
+                Foreground="#F44336"
+                LineSpacing="0"
+                Text="Max: 3,452,564" />
+        </Grid>
+    </StackPanel>
+
+</UserControl>

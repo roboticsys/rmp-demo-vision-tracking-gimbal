@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <Platforms>AnyCPU;x64</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="RapidLaser.json">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>  
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <RSIProtoPath Condition="'$(OS)' == 'Windows_NT'">C:\repos\jpRapidSoftware\RapidStuff\protos</RSIProtoPath>
+    <RSIProtoPath Condition="'$(OS)' != 'Windows_NT'">/rsi/protos</RSIProtoPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+		<Protobuf Include="$(RSIProtoPath)\rapidcode.proto" GrpcServices="Client">
+			<Link>Assets\protos\rapidcode.proto</Link>
+		</Protobuf>
+		<Protobuf Include="$(RSIProtoPath)\rapidgrpc.proto" GrpcServices="Client">
+			<Link>Assets\protos\rapidgrpc.proto</Link>
+		</Protobuf>
+		<Protobuf Include="$(RSIProtoPath)\rsienums.proto" GrpcServices="Client">
+			<Link>Assets\protos\rsienums.proto</Link>
+		</Protobuf>
+	</ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ActiproSoftware.Controls.Avalonia" />
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+
+    <PackageReference Include="HotAvalonia" Condition="'$(Configuration)' == 'Debug'" PrivateAssets="All" Publish="True" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Grpc.Net.Client" />
+    <PackageReference Include="Grpc.Tools" PrivateAssets="All" />
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Material.Icons.Avalonia" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="SSH.NET" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Assets\Fonts\ShareTechMono\" />
+    <Folder Include="Assets\protos\" />
+  </ItemGroup>
+
+</Project>
