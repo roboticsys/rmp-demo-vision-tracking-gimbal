@@ -2,11 +2,19 @@
 
 RapidLaser is a mechanical demonstration designed to showcase the precision of RSI's RMP EtherCAT Motion Controller, specifically its [**RealTimeTasks**](https://support.roboticsys.com/rmp/rttasks.html) feature which allows you to execute deterministic user logic, motion control, and I/O operations without specialized real-time programming expertise.  
 
+## Video
+
+See the demo in action at the following link.
+
+[![Watch the video](https://i.ytimg.com/vi/KI2aR-M14ZM/maxresdefault.jpg)](https://www.youtube.com/watch?v=KI2aR-M14ZM)
+
+## Overview
+
 It features a two-axis gimbal mechanism that uses Basler's Pylon SDK and OpenCV to track a colored ball in real time, dynamically positioning a laser to keep the ball centered.
 
 ![System Diagram](assets/system-diagram.png)
 
-## 🚀 Features
+## Features
 
 - Real-time tracking using OpenCV & Pylon SDK
 - Two-axis gimbal system
@@ -14,14 +22,14 @@ It features a two-axis gimbal mechanism that uses Basler's Pylon SDK and OpenCV 
 - Multi-platform UI developed using Avalonia UI
 - Linux PREEMPT_RT for sub millisecond deterministic control
 
-## 📁 Project Structure
+## Project Structure
 
 - `rttasks/` - Core source code containg the RMP RealTimeTasks functions
 - `scripts/` - Utility scripts for running the UI, and more
 - `servers/` - Contains the .NET 10 camera server for sending images to the UI
 - `ui/` - Main desktop demo UI/app (RapidLaser.Desktop)
 
-## 📦 Prerequisites
+## Prerequisites
 
 - Linux PC
 - [RMP SDK](https://www.roboticsys.com/rmp-ethercat-motion-controller)
@@ -29,9 +37,9 @@ It features a two-axis gimbal mechanism that uses Basler's Pylon SDK and OpenCV 
 - Basler camera (with Pylon SDK)
 - OpenCV
 
-## 🏁 Quick Start
+## Quick Start
 
-### 🖥️ Run the UI
+### Run the UI
 
 Navigate to the `scripts/` folder and run the appropriate script for your platform:
 
@@ -48,6 +56,6 @@ Navigate to the `scripts/` folder and run the appropriate script for your platfo
 
 **Note**: the `ui_run.sh` script will call dotnet publish only if it does not locate an executable in the temp/ folder
 
-## 📝 Blog
+## Blog
 
 See the blog for detailed information here: https://www.roboticsys.com/case-studies/vision-tracking-gimbal-demo
