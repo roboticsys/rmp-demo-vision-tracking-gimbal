@@ -6,7 +6,7 @@ RapidLaser is a mechanical demonstration designed to showcase the precision of R
 
 See the demo in action at the following link.
 
-[![Watch the video](https://i.ytimg.com/vi/KI2aR-M14ZM/maxresdefault.jpg)](https://www.youtube.com/watch?v=KI2aR-M14ZM)
+[![Watch the video](assets/gimbal_thumbnail.jpg)](https://www.youtube.com/watch?v=1OyGSqaYYQg)
 
 ## Overview
 
